@@ -1,0 +1,119 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr>
+<td><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>gauge_filter.pl:&nbsp;</font></font></b>
+<br><b><font color="#800080"><font size=+1>Filter gauges from the second
+intermedate to create a new second intermedate file.</font></font></b></td>
+</tr>
+</table></center>
+<b>Updated</b>: January 12, 1999.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<pre><b><font color="#B22222">&nbsp;&nbsp;&nbsp; gauge_filter.pl [-h] [-f filter.file] [[&lt;] second_intermediate_file]
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Where: -f filter.file - lines of time and gauge specification that
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; will be removed from stdin.&nbsp; Default: none.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -v - Verbose.&nbsp; Show how much was filtered.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -h - Show usage.</font></b>
+
+<hr WIDTH="100%"></pre>
+
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<font color="#000000">This is the second of three steps required to perform
+the gauge quality control.&nbsp; The first step, <a href="automatic_qc.html">automatic_qc.pl</a>,
+generates a filter file.&nbsp;&nbsp; <b>gauge_filter.pl</b> applies the
+filter file to the second intermediate file to produce a new second intermediate
+file; typically called the third intermediate file.&nbsp; The third intermediate
+file identical in format to the second intermediate file except that the
+gauges that didn't meet the QC criteria have been removed.&nbsp; This third
+intermediate file should be the final merged radar and gauge dataset suitable
+for determining the R/G bulk adjustment to the FACE ZR equation: 300R<sup>1.4</sup>.</font>
+<p><font color="#000000">The filter file, filter.file above, has a crontab-like
+format.&nbsp; The format is like crontab, except that the time specification
+only accepts * and - wild cards, and the command portion is really the
+gauge and network that is to be removed.&nbsp;&nbsp; Comments are allowed,
+delimited by #. Here is an example:</font>
+<p><tt><font color="#000000"># You can specify:</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+--&nbsp; Wild match.&nbsp; This matches all possibilities.</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp; n-m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+--&nbsp; Range.&nbsp; n=begin, m=end, inclusive.</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp; Exact values&nbsp;&nbsp;
+--&nbsp; Exact time specification.</font></tt>
+<br><tt><font color="#000000">#</font></tt>
+<br><tt><font color="#000000"># Example:</font></tt>
+<br><tt><font color="#000000">#</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # at
+6:10 a.m. every day</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10
+6 * * * STJ 511 # Comment ...</font></tt>
+<br><tt><font color="#000000">#</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # at
+11:00-11:59 a.m. on the 4th for 1997 and 1998.</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * 11
+4 * 1997-1998 SFL 101</font></tt>
+<br><tt><font color="#000000">#</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # 4:00
+a.m. on january 1st</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 4
+1 1 * STJ 511</font></tt>
+<br><tt><font color="#000000">#</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # once
+an hour.</font></tt>
+<br><tt><font color="#000000">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 *
+* * * STJ 511</font></tt>
+<p><font color="#000000">To construct R/G, the third step of the gauge
+QC, the ratio of the total rain from the radar (R) to the total rain from
+the gauge (G), merely run <a href="gauge_gui.html">gauge_gui_main.pl</a>,
+select the entire network and observe (in the title) the R/G value.&nbsp;
+This value is the bulk adjustment that should be applied to the FACE equation,300R<sup>1.4</sup>.&nbsp;
+The bulk adjustment is applied to the coefficient, 300.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Options</font></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Input</font></h3>
+<b><font color="#B22222">second_intermediate_file.ascii</font></b><font color="#000000">,
+this may be from stdin.</font>
+<br><font color="#993300"><b>filter.file</b> </font><font color="#000000">a
+gauge filter file in crontab format -- Filter out gauges.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Temporary Files or Directories</font></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Output</font></h3>
+<font color="#000000">None.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Return Value</font></h3>
+<font color="#000000">None.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Author</font></h3>
+John H. Merritt, <i>Space Applications Corporation (SAC), NASA/GSFC/TRMM
+Office</i>
+</body>
+</html>

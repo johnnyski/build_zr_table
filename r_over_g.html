@@ -1,0 +1,140 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr>
+<td><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>r_over_g.pl:&nbsp;</font></font></b>
+<br><b><font color="#800080"><font size=+1>Given the merged radar and gauge
+ascii file, generate a table of R/G for each gauge, net and site for Convective
+and Stratiform.</font></font></b></td>
+</tr>
+</table></center>
+<b>Updated</b>: February 9, 1999.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<p><br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp; gauge_radar_accum.pl
+</font><font color="#999900">[s.ascii] </font><font color="#B22222">| r_over_g.pl
+</font><font color="#999900">[--help] [--total-only]</font></tt></b>
+<br>&nbsp;
+<p>
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<font color="#000000">Take the output of gauge_radar_accum.pl and generate
+a summary</font>
+<br><font color="#000000">&nbsp;table that shows the R/G for each gauge,
+the net and the entire</font>
+<br><font color="#000000">&nbsp;file for each rain type: stratiform, convective,
+etc.</font>
+<p><font color="#000000">&nbsp; The input does not need to be sorted.</font>
+<p><font color="#000000">&nbsp;Example usage:</font>
+<p><font color="#000000">&nbsp;<tt>gauge_radar_accum.pl radar_merged.ascii
+| r_over_g.pl</tt></font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Options</font></h3>
+<font color="#000000">&nbsp;&nbsp;&nbsp; <tt>--total-only&nbsp;&nbsp; </tt>-
+Generate R and G sums, don't perform R/G.</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp; <tt>--help&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</tt>- Print the usage.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Input</font></h3>
+<font color="#000000">The output of the command gauge_radar_accum.pl.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Output</font></h3>
+<font color="#000000">Table of R/G for each gauge, network, site and the
+total R/G for the entire input file.&nbsp; Here is an example, the command
+is:&nbsp; </font><font color="#FF0000">gauge_radar_accum.pl s.ascii | head
+| r_over_g.pl</font><font color="#000000">.&nbsp; Each gauge is listed
+by network and gauge number and the stratiform and convective r/g for them
+are presented.&nbsp; At the end of the gauge list, you'll see just the
+network entries.&nbsp; The R/G for these represent the total R<sub>total</sub>/G<sub>total</sub>
+for the entire network.&nbsp; The <b>Total</b> entry shows the R/G for
+the entire input file -- it could be interpreted as the <b>site</b> R/G.</font>
+<br>&nbsp;
+<p>&nbsp;<tt>&nbsp; Gauge&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Stratiform&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Convective</tt>
+<br><tt>net&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+r/g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+r/g</tt>
+<br><tt>----------------------------------------------------</tt>
+<br><tt>STJ&nbsp;&nbsp; 106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.1548</tt>
+<br><tt>STJ&nbsp;&nbsp; 263&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.0374&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.0915</tt>
+<br><tt>STJ&nbsp;&nbsp; 271&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.9149</tt>
+<br><tt>STJ&nbsp;&nbsp; 277&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8.1673&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.0000</tt>
+<br><tt>STJ&nbsp;&nbsp; 294&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.9233</tt>
+<br><tt>STJ&nbsp;&nbsp; 507&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.0845&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.0000</tt>
+<br><tt>STJ&nbsp;&nbsp; 511&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.0000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.9597</tt>
+<br><tt>STJ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.3585&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.1498</tt>
+<br><tt>Total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.3585&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.1498</tt>
+<p>You can get the radar and gauge rain totals by using the <font color="#CC0000">--total-only</font>
+option:
+<br><tt>Ex 2: sort_zr_intermediate_ascii s.ascii | gauge_radar_accum.pl
+| head | r_over_g.pl --t</tt>
+<p><tt>&nbsp;&nbsp; Gauge&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Stratiform&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Convective</tt>
+<br><tt>net&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Total R&nbsp;&nbsp;
+Total G&nbsp;&nbsp; Total R&nbsp;&nbsp; Total G</tt>
+<br><tt>----------------------------------------------------</tt>
+<br><tt>SFL&nbsp;&nbsp;&nbsp; 54&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.73&nbsp;&nbsp;&nbsp;&nbsp;
+16.76</tt>
+<br><tt>SFL&nbsp;&nbsp;&nbsp; 85&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.51&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.41&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.52</tt>
+<br><tt>SFL&nbsp;&nbsp; 143&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.70&nbsp;&nbsp;&nbsp;&nbsp; 23.59&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.68&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3.37</tt>
+<br><tt>SFL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8.21&nbsp;&nbsp;&nbsp;&nbsp; 24.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.59&nbsp;&nbsp;&nbsp;&nbsp;
+20.65</tt>
+<br><tt>Total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8.21&nbsp;&nbsp;&nbsp;&nbsp; 24.00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.59&nbsp;&nbsp;&nbsp;&nbsp;
+20.65</tt>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">See also</font></h3>
+<font color="#000000"><a href="automatic_zr.html">automatic_zr.pl</a>,
+<a href="gauge_radar_accum.html">gauge_radar_accum.pl</a>,
+<a href="gauge_gui.html">gauge_gui_main.pl</a>.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Author</font></h3>
+John H. Merritt, SM&amp;A Corp.<i>, NASA/GSFC/TRMM Office</i>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr ALIGN=LEFT>
+<td ALIGN=LEFT><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>merge_radarNgauge_data:&nbsp;</font></font></b>
+<br><b><font color="#800080"><font size=+1>Merge Radar and Gauge Data</font></font></b></td>
+</tr>
+</table>
+<b>Updated</b>: February 9, 1999.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<ul>
+<pre><b><font color="#B22222">merge_radarNgauge_data [-v]&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-k] [-n] [-t <i>window_time</i>] [-O <i>window_center_offset</i>]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-f <i>gauge_db_file</i>] [-z <i>min_valid_Z_value</i>]&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-F <i>discarded_vos_file</i>]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i>first_zr_intermediate_infile second_zr_intermediate_outfile</i></font></b></pre>
+</ul>
+
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<font color="#000000">This program corresponds to the second build ZR tables
+processing step. It merges the radar and gauge data to create the second
+ZR intermediate file which will be used as input to <a href="automatic_zr.html">automatic_zr.pl</a>,
+<a href="automatic_qc.html">automatic_qc.pl</a>,
+<a href="gauge_filter.html">gauge_filter.pl</a>,
+<a href="gauge_gui.html">gauge_gui_main.pl</a>,
+and <a href="build_pmm_zr_table.html">build_pmm_zr_table</a>, to name a
+few.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Options</font></h3>
+<b><font color="#B22222">-v: </font></b><font color="#000000">Show verbose
+messages of program execution.</font>
+<br><font color="#B22222"><b>-k:</b> </font><font color="#000000">Tell
+the system to keep the partially completed out file in case of failure.
+Default: Remove the partially completed outfile when error occurs.</font>
+<br><font color="#B22222"><b>-n</b>: </font><font color="#000000">Not discard
+any VOS entry. Choosing this option will result in very huge output file.
+Default: Discard all entries having no valid gauge rain rate nor (rain
+classification, reflectivity) pair.</font>
+<br><font color="#B22222"><b>-t</b>: </font><font color="#000000">Specify
+the window time interval, in minutes. See option, </font><b><font color="#993300">-O</font></b><font color="#000000">,
+to define window centered time. Default: 10.</font>
+<br><b><font color="#993300">-O</font></b>: Specify the number of offset
+minutes for defining the window centered time. It can be +/-. Centered
+time = [vos_time + offset]. Default: 2.
+<br><b><font color="#B22222">-f</font></b><font color="#000000">: Spedify
+<a href="build_gauge_db.html">gauge
+database</a> filename. Default is <i>$GVS_DB_PATH/gauge.gdbm</i>.</font>
+<br><b><font color="#B22222">-z</font></b><font color="#000000">: Specify
+the mininum valid Z value. All smaller Z values are invalid. Default: 0.0.</font>
+<br><b><font color="#B22222">-F</font></b><font color="#000000">:Specify
+discarded vos filename. The program will write the info. of the discarded
+VOSes to this file. Default: &lt;<i>output filename></i>.<i>discarded_vos.ascii.</i></font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Inputs</font></h3>
+
+<ul>
+<li>
+<b><font color="#B22222">first_zr_intermediate_infile </font></b><font color="#000000">File
+contains radar data over gauges and rain types. It's the product of <a href="get_radar_data_over_gauge.html">get_radar_data_over_gauge</a>.
+Note: For the current release, </font><b><font color="#B22222">merge_radarNgauge_data
+</font></b><font color="#000000">accepts
+</font><b><font color="#B22222">first_zr_intermediate_infile
+</font></b><font color="#000000">in
+ASCII format; therefore, run </font><b><font color="#993300">first2ascii</font></b><font color="#000000">
+to convert that file in GDBM format to ASCII format. (The conversion from
+GDBM to ASCII will not be necessary once the interface of </font><b><font color="#993300">merge_radarNgauge_data</font></b><font color="#000000">
+accepts the GDBM format. It is in development now).</font></li>
+
+<li>
+<b><font color="#B22222"><a href="build_gauge_db.html">Gauge database</a></font></b><font color="#000000">.
+GDBM file containing gauge rain rates for either a single or multiple gauge
+sites. Default is <i>$GVS_DB_PATH/gauge.gdbm</i>. This file may be specified
+using option </font><b><font color="#B22222">-f</font></b><font color="#000000">.</font></li>
+</ul>
+
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Temporary Files or Directories</font></h3>
+<font color="#000000">None.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Output</font></h3>
+<b><font color="#B22222">second_zr_intermediate_outfile </font></b><font color="#000000">File
+contains radar data over gauge, rain types, and gauge data.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Return Value</font></h3>
+<b><font color="#B22222">merge_radarNgauge_data</font></b><font color="#000000">
+returns 0 upon successful completion; 2 upon interruption; non-zero, otherwise.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Author</font></h3>
+
+<li>
+<font color="#000000">John H. Merritt<i>. SM&amp;A Corp., NASA/GSFC/TRMM
+Office</i></font></li>
+
+<li>
+<font color="#000000">Thuy Nguyen, <i>Science Systems and Applications
+Inc.(SSAI), NASA/GSFC/TRMM Office</i></font></li>
+
+</body>
+</html>

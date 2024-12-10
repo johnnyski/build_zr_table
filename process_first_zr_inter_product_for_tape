@@ -1,0 +1,234 @@
+#! /usr/bin/perl
+#-+-Perl-+-
+#
+#
+# process_first_zr_inter_product_for_tape-
+#      Run 'get_radar_data_over_gauge' for each file in 
+#      <top_input_dir>/gvs_<2A-54,5 prods>_<tapeid>.
+#
+#--------------------------------------------------------------------------
+#
+# By:
+#
+#     Ngoc-Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA/TRMM Office
+#     nguyen@trmm.gsfc.nasa.gov
+#     September 29, 1997
+# 
+#  Copyright (C) 1998
+#
+#***************************************************************************
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$PROG_VERSION = "build_zr_table-v1.14";
+print STDERR "Which program: $0\n";
+print STDERR "Version: $PROG_VERSION\n";
+
+$first_time_exit_handler = 1;
+$tape_id = "";
+$outfile = $save_curr_dir."zr_first_intermediate";
+$level2_top_input_dir = $save_curr_dir;
+$option_file = "";
+$this_prog_dirname = "zr_$$/";
+$top_working_dir = $save_curr_dir.$this_prog_dirname;
+
+do process_args(@ARGV);
+do do_system_call("mkdir -p $top_working_dir");
+print STDERR "$this_prog: Will work in <$top_working_dir>...\n";
+chdir $top_working_dir;  #
+
+# The product dir name should follow the naming convention of
+# 'all_tape_level_1n2'.
+$p2A54_dir = $level2_top_input_dir."/".&get_gvs_dir_name("2A-54", $tape_id);
+$p2A55_dir = $level2_top_input_dir."/".&get_gvs_dir_name("2A-55", $tape_id);
+print STDERR "tape: $tape_id\n";
+print STDERR "2A54 dir: $p2A54_dir\n";
+print STDERR "2A55 dir: $p2A55_dir\n";
+print STDERR "outfile: $outfile\n";
+print STDERR "option file: $option_file\n";
+
+opendir(P2A55_DIR, $p2A55_dir);
+@p2A55_files = grep(/^2A55.*HDF.*/, readdir(P2A55_DIR));
+closedir(P2A55_DIR);
+$options = "";
+$options = &get_options_from_file($option_file) if ($option_file ne "");
+$rc = 0;
+
+$p2A55_uncompressed_file = $top_working_dir."/2A55.HDF";
+$p2A54_uncompressed_file = $top_working_dir."/2A54.HDF";
+while (@p2A55_files) {
+	local($str) = shift @p2A55_files;
+	$p2A55_file = $p2A55_dir.$str;   # absolute path
+	# Get the associated 2A54 product.
+    $p2A54_file = &get_2a54_file($p2A54_dir, $p2A55_file); # absolute path
+	if ($p2A54_file eq "") {
+		print STDERR "$0: $p2A55_file has no associated 2A-54 file.\n";
+		next;
+	}
+	$uncompress_2A54 = 0;
+	$uncompress_2A55 = 0;
+	
+	# Uncompress  file if neccessary. 
+	# Uncompress file to the $top_working_dir -- leave the original file unchanged.
+	print STDERR "Processing for ... $p2A55_file and $p2A54_file\n";
+	if ($p2A55_file =~ /(\.gz$)|(\.Z$)/) {
+		do do_system_call("gunzip -fc $p2A55_file > $p2A55_uncompressed_file");
+		$p2A55_file = $p2A55_uncompressed_file;
+	}
+	if ($p2A54_file =~ /(\.gz$)|(\.Z$)/) {
+		do do_system_call("gunzip -fc $p2A54_file >$p2A54_uncompressed_file");
+		$p2A54_file = $p2A54_uncompressed_file;
+	}
+	
+	$cmd = "get_radar_data_over_gauge $options $p2A54_file $p2A55_file $outfile";
+	print STDERR "Executing... <$cmd>\n";
+	$rc = do do_system_call($cmd);
+	if ($rc != 0) {
+		print STDERR "$0: ERROR: Failed to execute <$cmd>\n";
+		$rc = -1;
+	}
+}
+do clean_up();
+if ($rc == -1) {
+	print STDERR "$this_prog: Failed.\n";
+	exit(-1);
+}
+print STDERR "$this_prog: Successful.\n";
+exit(0); # Successful
+########################### Subroutines ################################
+
+sub usage {
+	print STDERR "Usage ($PROG_VERSION): Radar Data over Gauge Extraction for a Whole Tape.\n";
+	print STDERR "     $this_prog [-i top_input_dir]\n",
+                 "                 [-f output_filename] [-o option_file] tapeID\n";
+	print STDERR " Where,\n",
+	             "  -i:   Specify the top input dir where 'gvs_<prod>_<tapeID>'s are.\n",
+                 "        <prod> := 2A-54 | 2A-55. Product files may be compressed. Default: ./\n",
+                 "  -f:   Specify the filename for product. Default: zr_first_intermediate. \n",
+                 "        The file will be appended if it exists.\n",
+                 "  -o:   Specify the option filename. File contains options\n",
+                 "        to 'get_radar_data_over_gauge'.  Default: \"\".\n";
+
+	exit(-1);
+
+}
+
+sub process_args {
+	local(@arglist) = @_;
+	if ($#arglist < 0) {
+		do usage();
+	}
+	local($str) = "";
+	while ($#arglist >= 0) {
+		$str = shift @arglist;
+
+		if ($str eq "-i") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$level2_top_input_dir = &change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+
+		elsif ($str eq "-f") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$outfile = &change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+		elsif ($str eq "-o") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$option_file = &change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+
+		next;
+NEXT:
+		$str = "";
+	}
+
+	$tape_id = $str;
+
+	do usage() if ($tape_id eq "");
+}
+
+sub clean_up {
+	chdir $save_curr_dir;    # Go back to the original dir.
+	system("rm -r $top_working_dir") 
+		if ($top_working_dir ne "" && -d $top_working_dir);
+}
+
+# Get options from options file. 
+sub get_options_from_file {
+	local($fname) = @_;
+	local($opts);
+	return "" if ($fname eq "" || !(-e $fname));
+	open (OPTIONS, $fname) ||
+		(do clean_up() && die "Couldn't run $cmd: $!\n");
+	$opts = <OPTIONS>; 
+
+	close(OPTIONS);
+	chop $opts if $opts =~ /(\n)|(\r)/;
+	$opts;
+}
+
+
+
+sub get_2a54_file {
+	local($p2A54_dir, $p2A55_file) = @_;
+	# Get 2A54 file in $p2A54_dir associated with 2A55 file.
+	# REturn "" if not found.
+
+	local(@path) = split(/\//, $p2A55_file);
+	local($tmp_file) = $path[$#path];
+	$tmp_file =~ s/2A55/2A54/;   # Changed 2A55 to 2A54 only.
+	$tmp_file =~ s/(\.gz$)|(\.Z$)//;   # Remove .gz or .Z extention
+
+	local($p2A54_file) = $p2A54_dir."/".$tmp_file;
+	local($core_fname) = $p2A54_file;						
+	return $p2A54_file if (-e $p2A54_file);
+
+	$p2A54_file = $core_fname.".gz";
+	return $p2A54_file if (-e $p2A54_file);
+
+	$p2A54_file = $core_fname.".Z";
+	return $p2A54_file if (-e $p2A54_file);
+	return "";
+}
+
+sub do_system_call {
+	local($cmd) = @_;
+	# REturn 0 for successful
+	local($rc) = 0;
+#print STDERR "CMD::::::<$cmd>\n\n";
+	system($cmd);
+	local($status) = $? >> 8;
+	(do clean_up() && exit(2))
+		if ($status == -2 || $status ==254);   # interrupted
+	local($signal) = $? & 255;
+	(do clean_up() && exit(-1)) if ($signal != 0); # interrupted
+	return 0 if $status == 0;
+	return -1;
+}
+
+sub doexit_handler {
+	local($signal) = @_;
+    # Ignore signals 
+	do ignore_catched_signals();
+	local($rc) = $SEVERE_ERROR_CODE;
+	if ($signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP' ||
+		$signal == 9 || $signal == 2) {
+		$rc = $INTER_CODE;
+	}
+	if ($first_time_exit_handler) {
+		$first_time_exit_handler = 0;
+		print STDERR "$this_prog: Received signal <$signal>\n";
+		do clean_up();
+	}
+	exit($rc);
+}
+
+
+
+

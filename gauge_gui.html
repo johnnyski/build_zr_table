@@ -1,0 +1,156 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr>
+<td><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>gauge_gui_main.pl:&nbsp;</font></font></b>
+<br><b><font color="#800080"><font size=+1>Graphical interface to the Gauge
+Quality Control.</font></font></b></td>
+</tr>
+</table></center>
+<b>Updated</b>: July 22, 1998.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<pre><b><font color="#B22222">&nbsp;&nbsp;&nbsp; gauge_gui_main.pl</font></b>
+
+
+<hr WIDTH="100%"></pre>
+
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<font color="#000000">Provides a grahical user interface to several gauge
+quality control programs and displays the data.&nbsp; There are two basic
+sets of information presented:</font>
+<ol>
+<li>
+<font color="#000000">The linear correlations between the gauge and radar
+rain rates.</font></li>
+
+<li>
+<font color="#000000">The time plot of the gauge and radar rain accumulations.</font></li>
+</ol>
+<font color="#000000">Additionally, you can control which gauges are displayed
+and for which time ranges; you specify the gauge and time range to exclude.</font>
+<p><font color="#000000">There is a <a href="gauge_gui.help">help</a> file.</font>
+<br>Here are some <a href="gauge_gui_screenshot.html">screenshots</a>.
+<p><font color="#000000">In brief, there are three basic funtions you can
+perform:</font>
+<ol>
+<li>
+<font color="#000000">Display Gauge/Radar correlations.</font></li>
+
+<li>
+<font color="#000000">Plot Gauge and Radar rain accumulations as a function
+of time.</font></li>
+
+<li>
+<font color="#000000">Filter specific gauges for specific time ranges from
+the data.</font></li>
+</ol>
+<font color="#000000">Several programs are executed, in series (unix piped
+together), to provide the functionality for the GUI.&nbsp; And, due to
+the simple nature of the interface, it is not possible to execute these
+programs one at a time.&nbsp; This is not to say that you cannot run them
+as regular unix commands; this is outside the scope of the GUI.&nbsp; Here
+is the glossary of commands:</font>
+<br>&nbsp;
+<ul>
+<li>
+<b><a href="gauge_qc.html">gauge_qc.pl</a> </b>- Compute the Gauge/Radar
+correlations.&nbsp; The output of this program is displayed in the <i>Correlations</i>
+window.&nbsp; There you select one of the many gauges to plot the time
+series of radar and gauge rain accumulations.&nbsp; The plotting is done
+by <b>gauge_radar_plot_filter.pl</b>.</li>
+</ul>
+
+<ul>
+<li>
+<font color="#000000"><b>gauge_radar_plot_filter.pl</b> - The heart of
+the GUI.&nbsp; It runs several program to chop and reorganize the ascii
+data to make it suitable for plotting.&nbsp; The following are called:</font></li>
+
+<ul>
+<li>
+<font color="#000000"><b>sort_zr_intermediate_ascii</b> - It is important,
+only for plotting the rain accumulations that the data be sorted by time.&nbsp;
+The data needs to be sorted by time to properly filter any gauges from
+the data.</font></li>
+
+<li>
+<b>gauge_filter.pl</b> - Filters gauge data from the second intermediate
+file.&nbsp; This is done by specifying the time and gauge in a file, similiar
+to a unix crontab file.&nbsp;&nbsp; Specified gauges are removed from the
+data.</li>
+
+<li>
+<b>gauge_radar_accum.pl</b> - Generate the gauge and radar accumulation
+tables.&nbsp; Several columns of data are produced, but, three are important
+to the GUI: time, radar rain amount and gauge rain amount.&nbsp; The unix
+program 'cut' is used to extract these specific columns.</li>
+
+<li>
+<b>plot_subtract.pl</b> - Generates a difference, absolute, of the radar
+and gauge rain accumulations.</li>
+</ul>
+
+<li>
+<b>gauge_radar_plot_batch.pl</b> - Generate plots in a batch mode.&nbsp;&nbsp;
+Individual postscript files are generated for each gauge.&nbsp; Additionally,
+you can plot the rain accumulations for the entire network via the <b>-N</b>
+option.</li>
+</ul>
+While the execution of these programs is canned, you may execute them from
+the unix command line.&nbsp; You may want to do this when the second intermediate
+file size is large.&nbsp; The GUI is not optimized for large second intermediate
+files and can take some time to execute.&nbsp; The command listed above
+are executed each time the <b><i>Show gauges </i></b>button is pressed
+and each time a gauge is selected in the <b><i>Show gauges</i></b> window.&nbsp;
+One trick to speeding up the GUI is to run <tt>sort_zr_intermediate_ascii
+| gauge_filter.pl</tt> to create a new second_intermediate file that is
+much smaller, then the GUI will be more responsive.
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Options</font></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Input</font></h3>
+<b><font color="#B22222">second_intermediate_file.ascii</font></b><font color="#000000">specified
+via a browser window.</font>
+<br><font color="#993300"><b>filter.file</b> </font><font color="#000000">a
+gauge filter file in crontab format -- Filter out gauges.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Temporary Files or Directories</font></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Output</font></h3>
+<font color="#000000">None.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Return Value</font></h3>
+<font color="#000000">None.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Author</font></h3>
+John H. Merritt, <i>Space Applications Corporation (SAC), NASA/GSFC/TRMM
+Office</i>
+</body>
+</html>

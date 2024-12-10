@@ -1,0 +1,235 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.76 [en] (X11; U; Linux 2.4.2-2 i686) [Netscape]">
+   <meta name="Keywords" content="ZR Tables, ZR Tables Generation, ZR Table">
+   <title>TRMM ZR Tables Generation</title>
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=4 CELLSPACING=3 CELLPADDING=3 WIDTH="100%" >
+<tr ALIGN=CENTER VALIGN=CENTER>
+<td ALIGN=CENTER VALIGN=CENTER COLSPAN="2" ROWSPAN="2"><img SRC="to_zr_logo.gif" height=162 width=400></td>
+
+<td><b><font color="#800080"><font size=+4>Construct ZR Table Software</font></font></b></td>
+</tr>
+</table></center>
+
+<center><table BORDER=2 CELLSPACING=2 CELLPADDING=2 COLS=6 WIDTH="100%" BGCOLOR="#CCCCCC" NOSAVE >
+<tr ALIGN=CENTER VALIGN=CENTER NOSAVE>
+<td><b><font color="#000099">Current</font></b> <b><font color="#000099">Version:
+1.14</font></b></td>
+
+<td><b><font color="#000099">Released Date: </font><font color="#000000">09/08/03</font></b></td>
+
+<td><b><font color="#000099">Document</font></b> <b><font color="#000099">updated:</font><font color="#000000">01/19/00</font></b></td>
+
+<td><b><font color="#000000">See&nbsp;<a NAME="Readme"></a><a href="README">Readme</a></font></b></td>
+
+<td><b><font color="#000000">&nbsp;See&nbsp;<a NAME="Changes"></a><a href="CHANGES">Changes</a></font></b></td>
+
+<td ALIGN=CENTER VALIGN=CENTER NOSAVE><a NAME="Download"></a><b><font color="#000000"><a href="ftp://radar.gsfc.nasa.gov/pub/software/build_zr_table-LATEST.tgz">Download</a>
+Software</font></b></td>
+</tr>
+</table></center>
+
+<hr SIZE=4 WIDTH="100%">
+<h3>
+<a NAME="Description"></a><font color="#000080">Description</font></h3>
+<font color="#000000">This software package developed by the <a href="http://trmm-fc.gsfc.nasa.gov/trmm_gv/index.html">TRMM
+Satellite Validation Office</a> is in <a href="http://trmm-fc.gsfc.nasa.gov/trmm_gv/software/gvbox/gvbox.html">GVBOX</a>.&nbsp;
+It contains the programs necessary for building ZR tables. These ZR tables
+are stored as ASCII files.</font>
+<p><font color="#FF0000">NEW for 1.5</font><font color="#000000">: The
+gauge_gui_main.pl has a new appearance, but, no new functionality.</font>
+<p><font color="#FF0000">NEW for 1.0</font><font color="#000000">: The
+ZR table generation is fully automated.&nbsp; It is automated from the
+2<sup>nd</sup> intermediate file through the ZR table.&nbsp; The progam
+that does this is called <a href="automatic_zr.html">automatic_zr.pl</a>.&nbsp;&nbsp;
+It is possible to perform no QC and provide your own gauge filter file.&nbsp;
+It is possible to save the list of gauges, with their time range, that
+were removed during the QC step.</font>
+<p><font color="#FF0000">NEW for 1.0</font><font color="#000000">: The
+program
+<a href="build_zr_table.html">build_zr_table</a> has been added.&nbsp;
+This program has a command line interface to provide parameters to generate
+the ZR table.&nbsp; It is identical in function as build_dual_zr_table.c,
+but, has a command line interface.&nbsp; The program is only capable of
+generating a ZR table for stratiform and convective rain types and for
+a predetermined range dependancy: 0-15km, 15-100km, and beyond 100km.&nbsp;
+The ZR table is meaningfull for the</font>
+<br><font color="#000000">range 15-100km.</font>
+<p><font color="#000000">NEW for 0.26: The software contains the automated
+quality control of the merged gauge and radar dataset.&nbsp; The result
+of the quality control is a new merged gauge and radar dataset that only
+contains data that is acceptable -- all bad, or suspect, gauges have been
+removed.&nbsp; This program is called
+<a href="automatic_qc.html">automatic_qc.pl</a>.</font>
+<p><font color="#000000">Each ZR table may contain multiple ZR relationships.&nbsp;
+Typically, each ZR table represents the ZR relationships for all raintypes.&nbsp;
+For example, a single ZR contains a ZR relationship for only one rain classification.&nbsp;
+In such a case, only one ZR relationship is present in the ASCII file,
+whereas a dual ZR contains a ZR relationship for each of two rain types.&nbsp;
+In such a case, both ZR relationships are present in the ASCII file; one
+is listed after the other. The ZR table is then used as input for processing
+the <b><a href="../gvs/src/2A-53/2A-53.html">2A-53</a></b> product (2A-53
+is rain rate product in the second level of <b><a href="../gvs/doc/gvs_index.html">GVS</a></b>).</font>
+<p><font color="#000000">The construction of ZR tables requires the products
+<a href="../gvs/src/2A-54/2A-54.html">2A-54</a>
+and <a href="../gvs/src/2A-55/2A-55.html">2A-55</a>&nbsp; from GVS, and
+the gauge data as shown in the <b><a href="#Flow Diagram">Flow Diagram</a></b>
+below. From the flow diagram, several major independent processing steps
+are involved to produce the ZR tables file. The result file from the first
+step will be used by the second step, the result file from the second step
+will then be used by the third step, and so on. The major processing steps
+are:</font>
+<ol>
+<li>
+<font color="#000000">Extract radar window and Convective/Stratiform classifications
+for a time period (i.e., pentad, monthly) using 2A-54 and 2A-55 products
+and gauge site locations information. The output is the first ZR intermediate
+file.</font></li>
+
+<li>
+<font color="#000000">Merge radar data (the first ZR intermediate file)
+and gauge data . The output is the second ZR intemediate file.</font></li>
+
+<li>
+<font color="#000000">Run the automatic ZR table generator: <a href="automatic_zr.html">automatic_zr.pl</a>.</font>
+<hr WIDTH="100%"><a NAME="How to Build a ZR-Tables File"></a></li>
+</ol>
+
+<h3>
+<font color="#000080">How to Build a ZR Tables File</font></h3>
+<font color="#000000">Follow the steps below to build a ZR tables file.</font>
+<ol>
+<li>
+<font color="#000000"><b>Extract Radar Data: </b>To extract radar data
+over rain gauge data for a period (i.e., monthly), run one of the following
+programs multiple times:</font></li>
+</ol>
+
+<ol START=2>
+<ul>
+<li>
+<font color="#000000"><b>process_first_zr_inter_product_for_tape&nbsp;
+--</b>Perform data extraction for one tape of 2A-54 and 2A-55 products
+residing on disk.</font></li>
+
+<li>
+<font color="#000000"><b>process_first_zr_inter_product_for_tapes -- </b>Perform
+data extraction for multiple tapes of 2A-54 and 2A-55 products residing
+on disk.</font></li>
+
+<li>
+<font color="#000000"><b><a href="get_radar_data_over_gauge.html">get_radar_data_over_gauge</a></b>--
+Perform data extraction for a single pair of 2A-54 and 2A-55 products residing
+on disk.</font></li>
+
+<li>
+<font color="#000000"><b>process_first_zr_inter_product_for_non_hdf_files</b>
+--Perform data extraction for either UF or raw radar data files residing
+on either disk or tape; it processes1C-51, 2A-54 and 2A-55 products before
+it does data extraction. This program has options to keep 1C-51, 2A-54,
+and 2A-55 products on disk upon finishing.</font></li>
+</ul>
+<font color="#000000">(This step needs the <a href="ftp://radar.gsfc.nasa.gov/pub/gauge/GV_sitelists">gauge
+site locations data</a>)</font>
+<li>
+<font color="#000000">Run <b>first2ascii </b>to convert the output (in
+GDBM format) from the previous step to ASCII format.&nbsp; This step will
+not be necessary once the interface of <b>merge_radarNgauge_data </b>accepts
+the GDBM format. It is in development now.</font></li>
+
+<li>
+<font color="#000000"><b>Merge Radar and Gauge Data</b>: Run <b><a href="merge_radarNgauge_data.html">merge_radarNgauge_data</a></b>
+using the output from the previous step as input. (This step needs the
+<b><a href="build_gauge_db.html">gauge
+database</a></b>).</font></li>
+
+<li>
+<font color="#000000">Run the automated ZR table generation program, <a href="automatic_zr.html">automatic_qc.pl</a>.&nbsp;
+This program performs <a href="automatic_qc.html">Quality Control</a> on
+the second ZR intermediate file, determines the R/G bulk adjustments, then
+applies those adjustments to generate a ZR table.</font></li>
+</ol>
+
+<h3>
+<font color="#000099">Comparing 2A-53 with gauge data</font></h3>
+<font color="#000000">This step follows the production of 2A-53.&nbsp;
+Production of 2A-53 requires quality controled gauge data and the ZR tables
+as described above.&nbsp;&nbsp; To summarize:</font>
+<ol>
+<li>
+<font color="#000000"><a href="get_2A53_data_over_gauge.html">get_2A53_data_over_gauge</a>
+-- Identical in function to <a href="get_radar_data_over_gauge.html">get_radar_data_over_gauge</a>
+except that the input is only 2A-53 rather than 2A-54 and 2A-55.</font></li>
+
+<li>
+<font color="#000000"><b>first2ascii</b> to convert the gdbm output of
+<a href="get_2A53_data_over_gauge.html">get_2A53_data_over_gauge</a>
+to ascii.</font></li>
+
+<li>
+<b><font color="#000000">merge_radarNgauge_data</font></b></li>
+
+<li>
+<font color="#000000">Perform <a href="gauge_gui.html">Quality Control</a>.&nbsp;
+Really, you're not QC-ing the data, but, merely using the software to generate
+plots to show how well the 2A-53 and gauge accumulations match.</font></li>
+
+<h4>
+<font color="#000000">An example:</font></h4>
+<tt><font color="#000000">get_2A53_data_over_gauge 2A53.980207.1.MELB.1.HDF
+zzzz.gdbm</font></tt>
+<br><tt><font color="#000000">get_2A53_data_over_gauge 2A53.980207.2.MELB.1.HDF
+zzzz.gdbm</font></tt>
+<br><tt><font color="#000000">get_2A53_data_over_gauge 2A53.980207.3.MELB.1.HDF
+zzzz.gdbm</font></tt>
+<br><font color="#000000"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt>(Execute
+for all granules, it appends to zzzz.gdbm)</font>
+<p><tt><font color="#000000">first2ascii zzzz.gdbm > zzzz.ascii</font></tt>
+<p><tt><font color="#000000">merge_radarNgauge_data -f /rain2/merritt/melb_gauge.gdbm
+zzzz.ascii zzzz_2nd.ascii</font></tt>
+<p><font color="#000000">Filter out unwanted gauges; this is known from
+previous QC.</font>
+<br><tt><font color="#000000">gauge_filter.pl -f gauge.filter zzzz_2nd.ascii
+> zzzz_3rd.ascii</font></tt>
+<p><font color="#000000">Now for the plotting.&nbsp; </font><font color="#FF0000">Note:
+-R</font><font color="#000000">.</font>
+<p><tt><font color="#000000">gauge_radar_plot_batch.pl -f gaugefilter.file
+-R zzzz_3rd.ascii</font></tt>
+<br><font color="#000000"><tt>&nbsp;&nbsp;&nbsp; </tt>-or-</font>
+<br><font color="#000000"><tt>gauge_gui_main.pl&nbsp;&nbsp;&nbsp; </tt>(interactive:
+use zzzz_3rd.ascii)</font>
+<br>&nbsp;
+<br>&nbsp;</ol>
+
+<hr WIDTH="100%">
+<h3>
+<a NAME="Flow Diagram"></a><font color="#000080">Flow Diagram</font></h3>
+
+<center><img SRC="zr_diagram.gif" HSPACE=10 VSPACE=10 BORDER=10 height=627 width=548></center>
+
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Authors</font></h3>
+
+<ul>
+<li>
+<font color="#000000">Mike Kolander, Science Systems and Applications Inc.(SSAI),NASA/GSFC/TRMM
+Satellite Validation Office</font></li>
+
+<li>
+<font color="#000000">John H. Merritt, SM&amp;A, NASA/GSFC/TRMM Satellite
+Validation Office</font></li>
+
+<li>
+<font color="#000000">Ngoc-Thuy Nguyen, SSAI, NASA/GSFC/TRMM Satellite
+Validation Office</font></li>
+</ul>
+
+</body>
+</html>

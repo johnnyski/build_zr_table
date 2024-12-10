@@ -1,0 +1,131 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr>
+<td><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>build_gauge_db:&nbsp;</font></font></b>
+<br><b><font color="#000080"><font size=+2>Build Rain Gauge Database</font></font></b></td>
+</tr>
+</table></center>
+<b>Updated</b>: May 7, 1998.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<pre><b><font color="#B22222">&nbsp;&nbsp;&nbsp; build_gauge_db&nbsp; [-v] [-f <i>gauge_gdbm_file</i>] [-d <i>infile_modification_date_range</i>]&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp; <i>input_list</i>&nbsp;</font></b>
+
+
+
+<hr WIDTH="100%"></pre>
+
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<font color="#000000">This program creates/updates rain gauge database
+in GDBM format to be used by <b><a href="merge_radarNgauge_data.html">merge_radarNgauge_data</a>.</b>
+
+</font><font color="#B22222"><b>build_gauge_db</b> </font><font color="#000000">accepts
+rain gauge files and/or directories of rain gauge files as inputs, where
+rain gauge files are 2A-56 products from either a single or multliple gauge
+sites. (Note: Since the database query time increases as the size of the
+database increases, it is better to construct one gauge database for each
+radar site instead of one gauge database for multiple radar sites to improve
+the performance of the radar and gauge merging processing).</font> 
+<font color="#000000">Since
+rain gauge files may be modified after the gauge database has been created,
+this program allows multiple executions on the same input rain gauge file(s).
+When execution on the same rain gauge file(s) again, the program adds new
+entri(es) into the existing database but updates the existing entri(es)
+as appropriate. The </font>program for querying the gauge database is called
+<font color="#993300">query_gauge_db</font><font color="#000000"><b>;
+</b>it
+is used to query what's in the gauge database.</font> In addition, the
+program for validating the gauge database is called <font color="#993300">validate_gauge_db</font>.
+<p>
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Options</font></b></h3>
+<b><font color="#B22222">-v </font></b>Show verbose messages of program
+execution.
+<p><b><font color="#B22222">-f</font> </b>Specify filename for the output
+database. Default is <i>$GVS_DB_PATH/gauge.gdbm</i>. Default of <i>$GVS_DB_PATH</i>
+is <i>/usr/local/trmm/GVBOX/data/db</i>.
+<p><b><font color="#B22222">-d</font> </b>Specify the file modification
+date range. The file modification date is the date stamp when the file
+was last modified; it is not the date appeared on the input filename(s)
+(Note: Type '<i>ls -l&nbsp; 2A56*</i>' to see file modification dates for
+the gauge_files).&nbsp; Only add gauge files that has the file modification
+date within the specified date range. <b>Syntax:</b> <i>mm/dd/yy[yy]- |
+-mm/dd/yy[yy] </i>| <i>mm/dd/yy[yy]-mm/dd/yy[yy]</i>. Default: Add all
+gauge fileslisted or from the specified directori(es). For example,
+<ul>
+<li>
+Specify '<i>-d 1/23/98-</i>' to add only gauge files having the file modification
+date of 1/23/98 or later.</li>
+
+<li>
+Specify '<i>-d -2/23/98</i>' to add only gauge files having the file modification
+date earlier and/or equal to 2/23/98.</li>
+
+<li>
+Specify '<i>-d 1/23/98-2/23/98</i>' to add only gauge files having the
+file modification date between 1/23/98 and 2/23/98 inclusive.</li>
+</ul>
+
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Inputs</font></b></h3>
+A list of rain gauge file(s) and/or directori(es) contained rain gauge
+files separated by space. Rain gauge files are <a href="../gvs/src/2A-56/2A-56.html">2A-56</a>
+products.
+<p><b>Note:</b>
+<ul>
+<li>
+To build a gauge database for a single radar site, specify the gauge files
+and/or directories of that particular radar site only.</li>
+
+<li>
+To build a gauge database for multiple radar sites, specify the gauge files
+and/or directories of multiple radar sites.</li>
+
+<li>
+S<font color="#000000">ince the database query time increases as the size
+of the database increases, it is better to construct one gauge database
+for each radar site instead of one gauge database for multiple radar sites
+to improve the performance of <a href="merge_radarNgauge_data.html">merge_radarNgauge_data</a>.</font></li>
+</ul>
+
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Temporary Files or Directories</font></b></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Output</font></b></h3>
+Rain gauge database in GDBM format. The database may contain the gauge
+rain rates for either a single or multiple radar sites depending on the
+input sources. This file will be updated if it already exists . Note: The
+size of the gauge database may be very large.
+<p>
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Return Value</font></b></h3>
+<b><font color="#B22222">build_gauge_db</font><font color="#000000"> </font></b><font color="#000000">returns
+0 upon successful completion; 2 upon interruption; non-zero, otherwise.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Author</font></b></h3>
+Ngoc-Thuy Nguyen, <i>Science Systems and Applications Inc.(SSAI)</i>, NASA/GSFC/TRMM
+Office
+</body>
+</html>

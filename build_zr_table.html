@@ -1,0 +1,172 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr>
+<td><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>build_zr_table </font></font><font color="#800080"><font size=+1>Generate
+the ZR table from command line parameters for Stratiform and Convective
+raintypes.</font></font></b></td>
+</tr>
+</table></center>
+<b>Updated</b>: February 8, 1999.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+<b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp; build_zr_table [--site
+{KMLB, KWAJ, ...}]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[--sdate mm/dd/yyyy]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[--stime hh:mm:ss]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[--edate mm/dd/yyyy]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[--etime hh:mm:ss]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[-k x1 [-k x2 ...]]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[-a y1 [-a y2 ...]]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[-t t1 [-t t2 ...]]</font></tt></b><tt></tt>
+<p><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[-h | --help]</font></tt></b>
+<br><tt></tt>&nbsp;
+<p>Note:
+<br><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+</font><font color="#000000"><tt>-k</tt>, <tt>-a</tt>, and <tt>-t</tt>
+should be entered together.&nbsp; And the number</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+of parameters should match.&nbsp; (xn, yn, tn) defines a triplet</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+of (k, a, and raintype) that specify the function: R=kZ^a.</font>
+<p><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Currently, specify both x1 and x2, or y1 and y2 or t1 and t2.</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Currently,
+<tt>-t</tt> is not implemented, but, the rain types Stratiform</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+and Convective are known (hard coded) and the order</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+shown as the default is accurate: t1 = Stratiform</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+and t2 = Convective.</font>
+<p><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Soon to be implemented:</font>
+<br><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-k x1 -k x2 ... -k xn</font></tt>
+<br><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-a y1 -a y2 ... -a yn</font></tt>
+<br><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-t t1 -t t2 ... -t tn</font></tt>
+<br>
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<font color="#000000">Generates a dual ZR table using command line parameters.&nbsp;&nbsp;
+It generates a ZR table for the rain types: Stratiform and Convective.&nbsp;&nbsp;
+The rain types cannot be changed.&nbsp; The ZR table contains a range dependancy.&nbsp;
+That is to say that the ZR table has meaningful values for specific ranges
+of the data.&nbsp; Currently, the ranges are: 0-15km, 15-100km and beyond
+100km.&nbsp;&nbsp; These cannot be change.&nbsp; The ZR table contains
+meaningful values for the 15-100km range only.&nbsp; The other ranges are
+flagged as MISSING (set to -99).</font>
+<p><font color="#000000">The <b>-site</b> parameter, by default, uses the
+file /usr/local/trmm/GVBOX/data/gv_radar_site_info.data to determine the
+latitude and longitude of the radar site.&nbsp; Diagnostic messages are
+produced, if the site cannot be found or the gv_radar_site_info.data file
+cannot be found.</font>
+<br>&nbsp;
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000099">Details</font></h3>
+
+<p><br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Options</font></h3>
+<b><font color="#B22222">&nbsp;<tt>--site {KMLB, KWAJ, ...}]&nbsp; </tt></font><tt><font color="#000000">->
+Default: MELB</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+</font><font color="#000000">(See /usr/local/trmm/GVBOX/data/gv_radar_site_info.data)</font></tt></b>
+<br><b><tt><font color="#B22222">--sdate mm/dd/yyyy]&nbsp; </font><font color="#000000">->
+Start date. 00/00/0000</font></tt></b>
+<br><b><tt><font color="#B22222">--stime hh:mm:ss]&nbsp;&nbsp;&nbsp; </font><font color="#000000">->
+Start time. 00:00:00</font></tt></b>
+<br><b><tt><font color="#B22222">--edate mm/dd/yyyy]&nbsp; </font><font color="#000000">->
+End&nbsp;&nbsp; date. 00/00/0000</font></tt></b>
+<br><b><tt><font color="#B22222">--etime hh:mm:ss]&nbsp;&nbsp;&nbsp; </font><font color="#000000">->
+End&nbsp;&nbsp; time. 00:00:00</font></tt></b>
+<br><b><tt><font color="#B22222">-k x1 [-k x2 ...]]&nbsp;&nbsp; </font><font color="#000000">->
+Default: -k 300.0 -k 300.0</font></tt></b>
+<br><b><tt><font color="#B22222">-a y1 [-a y2 ...]]&nbsp;&nbsp; </font><font color="#000000">->
+Default: -a 1.4 -a 1.4</font></tt></b>
+<br><b><tt><font color="#B22222">-t t1 [-t t2 ...]]&nbsp;&nbsp; </font><font color="#000000">->
+Default: -t Stratiform -t Convective</font></tt></b>
+<p><b><tt><font color="#B22222">-h | --help]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+</font><font color="#000000">-> HELP.&nbsp; Print this usage.</font></tt></b>
+<br>Note:
+<br><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+</font><font color="#000000"><tt>-k</tt>, <tt>-a</tt>, and <tt>-t</tt>
+should be entered together.&nbsp; And the number</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+of parameters should match.&nbsp; (xn, yn, tn) defines a triplet</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+of (k, a, and raintype) that specify the function: R=kZ^a.</font>
+<p><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Currently, specify both x1 and x2, or y1 and y2 or t1 and t2.</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Currently,
+<tt>-t</tt> is not implemented, but, the rain types Stratiform</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+and Convective are known (hard coded) and the order</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+shown as the default is accurate: t1 = Stratiform</font>
+<br><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+and t2 = Convective.</font>
+<p><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Soon to be implemented:</font>
+<br><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-k x1 -k x2 ... -k xn</font></tt>
+<br><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-a y1 -a y2 ... -a yn</font></tt>
+<br><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+-t t1 -t t2 ... -t tn</font></tt>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Input</font></h3>
+None.&nbsp; The program is completely command line driven.
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Temporary Files or Directories</font></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Output</font></h3>
+<font color="#000000">The ZR table is written to STDOUT.&nbsp; The output
+is lengthy.</font>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Return Value</font></h3>
+<font color="#000000">None.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Author</font></h3>
+John H. Merritt, <i>SM&amp;A Corp. NASA/GSFC/TRMM Office</i>
+</body>
+</html>

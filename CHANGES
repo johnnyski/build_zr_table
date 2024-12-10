@@ -1,0 +1,381 @@
+CHANGES for build_zr_table
+===========================
+
+v1.14  (09/08/2003)
+-------------------------
+1. Fixed leap year bug in subroutine mmddyyyy_to_julian in gauge_radar_accum.pl.
+2. Appended "$(EXEEXT)" to target for gauge_gui.pl in Makefile.am to fix a
+   problem related to automake target generation and EXEcutable EXTensions.
+   See Automake in GNU Manuals Online (www.gnu.org) for details.
+3. Updated configure.in for autoconf 2.53.
+
+v1.13  (07/20/2001)
+-------------------------
+1. Second cappi range corrected to 99 km (was 96) in gauge_qc.pl,
+   gauge_radar_accum.pl, and gauge_radar_nonzero.pl.
+2. ZR table indexing problem corrected in zr.c.
+   The above problems were discovered and corrected by Dave Marks
+   and Dave Silberstein.
+
+  03/28/00
+-------------------------
+1.
+   Daylight savings time problem.
+   Modified build_dual_zr.c
+            build_single_zr.c
+            build_zr_histo.c
+            build_zr_table.c
+            zr.c
+            zr_utils.c
+   In all of the above, set tm.tm_isdst = -1 rather than 0
+
+
+
+
+v1.12  (02/08/2000)
+--------------------------
+1. It turns out that sgi, at least, doesn't have setenv.
+   So, use putenv instead.
+
+
+v1.11  (02/07/2000)
+--------------------------
+1. Definate fix for the day light savings time.  All
+   time calculations are UTC.
+
+v1.10  (02/04/2000)
+--------------------------
+1. zr_utils.c had routines that are in zr.h -- removed them.
+2. Possible fix to the daylight savings time bug.  I removed any 
+   conversion for daylight savings time.
+
+v1.9  (01/21/2000)
+--------------------------
+1. Fix the name of the main window.
+
+v1.8  (01/19/2000)
+--------------------------
+1. Fix the dbz/mm labeling problem.
+2. Check that a network is selected when setting options prior to any plotting.
+
+v1.7  (01/19/2000)
+--------------------------
+1. Interface mods.
+2. Fix -- saving config.
+
+v1.6  (01/11/2000)
+--------------------------
+1. Bug fixes.
+2. Face lift for gauge_gui_main.pl
+
+v1.5  (12/21/1999)
+--------------------------
+1. File eyalqc.f
+   a. Includes option to adjust range for gauge QC.
+   b. Gauges outside of valid range are labelled as bad
+      so that gauge_radar_accum.pl will not accumulate
+      from these gauges.
+   b. R/G bias test normalization calculation includes
+      only those gauges which pass the other three criteria.
+   c. Accumulation statistics from radar and gauge networks 
+      are printed when verbose flag is selected.
+   d. Increased array dimension for rrate and line -- the
+      parsing routine, to deal with uncommonly long second intermediate
+      lines.
+   e. Includes option to always use majority rule for center
+      pixel reflectivity classification.
+   f. Increased parameter for number of valid scans.
+
+2. build_zr_table.c
+   Added options: --maxdbz, --badval_above_max, --minrange, --maxrange
+
+3. Usage and doc changes.
+
+4. Uses configure.
+
+v1.4 (5/13/1999)
+--------------------------
+1. Valid range for data in ZR table is 15 to 150km.  Hard coded.
+2. Does not accumulate gauge values when == -501.00.  Defined as missing data.
+
+
+v1.3 (4/29/1999)
+--------------------------
+1. File gauge_radar_accum.pl.
+   a. UPPER case the raintype when reclassified.
+   b. When gauge is all 0, still accumulate the radar.
+   c. Save dBz for radar when reclassification occurs.
+   d. Changed default gauge averaging to 7 minutes (+/- 3.5 min).
+
+v1.2 (4/19/1999)
+--------------------------
+1. 'automatic_qc.pl' takes --positive-only option.
+2. 'eyalqc.f' changes the default to use negative gauge values.
+   See -p.
+3. 'gauge_radar_accum.pl' changes default to use negative.  See
+   --positive-only option.
+4. 'gauge_radar_accum.pl' added -center-only option.  This turns off
+   the majority rule reclassification of the center point.
+5. Fixed the -n bug in gauge_radar_accum.pl (accidently introduced 
+   between v0.28 and v1.0).  The option is now called --positive-only.
+6. Changed -n to -p for gauge_qc.pl.
+7. Changed -n to -p for gauge_radar_plot_batch.pl.
+8. Changed -n to -p for gauge_radar_plot_filter.pl.
+
+v1.1 (02/25/1999)
+--------------------------
+1. Port to SGI. Really only needed the getopt code from GNU C library.
+
+v1.0 (02/17/1999)
+--------------------------
+1. Created build_zr_table.c, modeled after build_dual_zr_table.c, 
+   which has command line interface to constucting the ZR table.
+
+2. Created r_over_g.pl.  This computes R/G for Stratiform and Convective.
+   Output can be the total only.  Sorting is NOT necessary, but, 
+   gauge_radar_accum.pl IS necessary.
+
+3. Fully automated the ZR generation.  Automated from the 2-nd intermediate
+   file through ZR generation.
+
+4. The graphical and batch programs compute R/G.
+
+v0.28 (01/20/1999)
+--------------------------
+1. Makefile mods: include -lm.
+2. Doc updates.
+
+v0.27 - (01/13/1999)
+--------------------------
+1. Documentation updates.
+2. F77 compliant for eyalqc.f
+
+v0.26 - (12/23/98)
+--------------------------
+1. Integrated Eyal's gauge QC program (eyalqc.f) as the primary
+   gauge quality control software.  Previous test versions have
+   been removed (See v0.25 and earlier for those earlier versions).
+
+2. Sorting uses the current directory for temporary files.
+
+3. Removed:
+       automated_single_event.pl
+       automatic_single_match.pl
+       automatic_contig_match.pl
+
+4. Renamed build_zr_table to build_pmm_zr_table.  That's more
+   descriptive of its function.
+
+5. Added build_{dual,single}_zr.c code, taken from gvs/src/2A-53/ver4,
+   and the zr.c and zr_table.h files.
+
+6. Documentation modifications.
+
+7. Sorting, now, by date, time, network then gauge.
+
+v0.25 - beta (10/23/98)
+--------------------------
+1. Added automatic_qc.pl -- Automatic quality control of gauges.
+   This introduced several support programs:
+       automated_single_event.pl
+       automatic_single_match.pl
+       automatic_contig_match.pl
+       make_gauge_filter_file.pl
+
+2. Uses the 3km cappi when data is beyond 96km (about 100km).
+
+3. v0.23, v0.24 were not official releases.
+
+4. Sped up gauge_filter.pl to handle very large filter files; the result
+   of automatic qc.
+
+v0.22 - beta (8/28/98)
+--------------------------
+* Added plotting of rainmap (2A-53) data as a merge to the gauge
+  data.  In other words, merging the 2A-53 data with the gauge
+  data for plotting correlations and accumulations over time.
+
+* Added -R to gauge_radar_accum.pl and gauge_radar_plot_filter.pl
+  and gauge_radar_plot_batch.pl
+
+* Added get_2A53_data_over_gauge.{c,h,html}
+
+* Beefed up zr.html doc.
+
+v0.21 - beta (8/17/98)
+--------------------------
+* Bug fix: reset the C/S flag to '-' for each record.
+* Fixed comment section in the ZR intermediate file (Z=-99 (missing/bad)).
+
+v0.20 - beta (8/06/98)
+--------------------------
+* Bug fix for columns of 'Show data' button.  Needed to
+  modify order of columns in gauge_radar_accum.pl.
+
+v0.19 - beta (8/04/98)
+--------------------------
+* Bug fix for network.
+* Can read .gz input files.
+* Added new programs: build_zr_histo, scale_zr_table
+* Removed unused variables and implicit warning messages.
+
+v0.18 - beta (7/28/98)
+-----------------------
+* Changed the criteria for merging radar and gauge data.
+    Keep VOS if:
+      Both radar and gauge data are not missing, or
+	  either radar or gauge sees rain, or
+	  -n is specified.
+
+v0.17 - beta (7/27/98)
+--------------------------
+* Minor GUI improvements.
+
+v0.16 - beta (7/24/98)
+--------------------------
+* Suped up the GUI.  Convective and Stratiform plotting for both
+  Radar and Gauge data.  Save data to file.
+
+* Screenshots in HTML.
+
+v0.15 - beta (7/23/98)
+--------------------------
+* Modified merge_radarNgauge_data:
+   1. Added option '-n', '-F'.
+   2. Added more comments (Software version#, etc...) to the output file.
+   3. Program will write the information of the discarded VOSes to a file,
+      '<ouput filename>.discarded_vos.ascii' (default).
+* Modified merge_2nd_zr_intermediate_files and
+        get_radar_data_over_gauge:
+   1. Added more comments (Software version#, etc...) to the output file.
+* Removed sort_2nd_zr_intermediate_file.
+* QC gui performs convective stratiform separation.
+
+v0.14 - beta (7/22/98)
+------------------------
+* Fix bug in xmin/xmax replotting in gauge_gui_main.pl
+* Added batch plot generation for QC.  gauge_radar_plot_batch.pl
+* Added plotting of networks via -N option on command line.
+* Added plotting of networks in GUI.
+
+
+
+v0.13 - beta (7/16/98)
+------------------------
+* Can plot negative Gauge values.
+
+v0.12 - beta (7/16/98)
+------------------------
+* Fixed units on y-axis.
+* Path defaults to that of filter file of second intermediate.
+* Added (pairs) to correlations.  See gauge_qc.pl.
+
+v0.11 - beta (7/16/98)
+------------------------
+* More GUI speed ups.  Now 12Mb input radar/gauge merged
+  files are processed in about 15 seconds.
+
+* To affect speed ups, the gui appearance changed slightly.
+
+v0.10 - beta (7/15/98)
+------------------------
+* GUI speed up.
+* Bug fixes.
+
+v0.9 - beta (7/14/98)
+------------------------
+* Bug fix for gauge_radar_plot_filter.pl -- argument handling.
+*  "   "   "  gauge_gui_main.pl
+* Other bug fixes.
+ 
+v0.8 - beta (7/10/98)
+------------------------
+* Added new option, '-z', to 'merge_radarNgauge_data'.
+* Changed build_zr_table.c
+   Increased Z resolution from 0.5 to 0.1 dB
+     Added command options:
+       -d: Disregard rain classification. Lump all classes together
+       -o <mins>:  Offset temporal gauge window from the input file's
+                temporal window center. (Default: 0 minutes)
+
+v0.7 - beta (7/1/98)
+-----------------------
+* Changed the makefile to allow uninstalling everything and to simplify
+  software installation.
+* Added document title in zr.html and zr_body.html.
+* Updated html pages.
+* Added more gauge qc'ing programs and documentation.
+* Added warning messages in the installation section in README.
+* Added more verbose messages to get_radar_data_over_gauge.c
+
+v0.6 - beta (5/7/98)
+-----------------------
+* Fixed bugs in build_gauge_db.
+* Added 'validate_gauge_db'.
+
+v0.5 - beta (4/30/98)
+-----------------------
+* Improved usage message for build_gauge_db and its documentation.
+* Have more error checkings and show warning and/or failure messages when
+  verbose option wasn't being specified.
+* Changed the default of GVS_DB_PATH to "/usr/local/trmm/GVBOX/data/db".
+* Changed missing gauge rain rate value from -99.9 to -501.0.
+* Bug fixes in query_gauge_db.c
+* Initialized uninitialzed buffers in the build_gauge_db.c and gauge_db.c--
+  this might solve the strange problem on tsdis01.
+
+v0.4 - beta (4/21/98)
+----------------------
+* Changed the format of the second intermediate file:
+   - Includes missing rain rates and rain rates of zero values.
+* Header section of the first and second intermediate zr file contain
+  more descriptive information.
+* The build gauge database program accepts 2A-56 products (GVS rain gauge 
+  data) as input data files. The gauge database is internally changed.
+* Added table of contents to the documentation. Changed the documentation.
+* Minor mod in the usage messages of 
+    'process_first_zr_inter_product_for_non_hdf_files'.
+* Added new programs: 'gauge_qc.pl', 'sort_zr_intermediate_ascii', 
+	'query_gauge_db', 'merge_2nd_zr_intermediate_files',
+    'gauge_radar_accum.pl', 'gauge_qc.wks'-- all of these programs', except
+    query_gauge_db's, interface will be enhanced in the future release.
+* Added new option, -O, to merge_radarNgauge_data.
+* Added new otptions: -c, -h, and -t to build_zr_table.
+* Requires gv_utils-v1.4.tgz.
+* Changed the default gauge site locations directory in 
+  get_radar_data_over_gauge.
+* Updated build_zr_table to accepts the new format of the 2nd ZR intermediate
+  file.
+
+v0.3 (3/24/98)
+---------------
+* Removed 'uf_files_to_first_zr_intermediate_product'.
+* Added 'process_first_zr_inter_product_for_non_hdf_files'.
+* Fixed the Houton entry in the site list table (Changed from HSTN to KHGX 
+  and THOM to TOMK for gsl radar site)
+* Requires gv_utils v1.3 and gvs_production-v3.9.
+* Updated doc.
+* Ported to SGI.
+
+v0.2 (3/12/98)
+---------------
+* Clarified usage messages and flow diagram.
+* Added some missing gif files in the Makefile.
+* Added synthesize_gauge.pl adn more documentation.
+* Initialized some buffers and added more verbose messages to the 
+  build_gauge program.
+
+v0.1 (2/27/98)
+---------------
+Initially created.
+
+11/20/97 -- work in progress.
+  1. Uses GDBM for first intermediate ZR file.  The numbers
+     are stored as 4-byte binary (scaled int by 1000).
+
+  2. Added first2ascii.c to dump an ascii version of the
+	 first intermediate ZR file.  The output is not sorted.
+
+  3. Routine name change:   gauge_construct_default_db_name.
+
+

@@ -1,0 +1,71 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT
+AC_CONFIG_SRCDIR(2A53.h)
+
+AM_INIT_AUTOMAKE(build_zr_table, v1.14)
+AM_CONFIG_HEADER(config.h)
+
+dnl Default for GVS and friends.
+AC_PREFIX_DEFAULT(/usr/local/trmm/GVBOX)
+
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PATH_PROGS(perlbin,perl)
+AC_PROG_F77
+
+dnl Checks for header files.
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_CHECK_HEADERS(malloc.h unistd.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_STRUCT_TM
+
+dnl Checks for library functions.
+AC_FUNC_MEMCMP
+AC_TYPE_SIGNAL
+AC_FUNC_STRFTIME
+AC_CHECK_FUNCS(mktime strdup strstr)
+
+if test $prefix = NONE; then
+  prefix=$ac_default_prefix
+fi
+LIBDIR="-L$prefix/lib -L/usr/local/lib"
+LIBS="-lz -lm"
+
+AC_CHECK_LIB(implode,  _implode,           ,,$LIBDIR)
+AC_CHECK_LIB(gdbm,     gdbm_open,          ,,$LIBDIR)
+AC_CHECK_LIB(jpeg,     jpeg_CreateCompress,,,$LIBDIR)
+AC_CHECK_LIB(df,       DFopen,             ,,$LIBDIR)
+AC_CHECK_LIB(mfhdf,    SDstart,            ,,$LIBDIR)
+AC_CHECK_LIB(tsdistk,  TKopen,             ,,$LIBDIR)
+AC_CHECK_LIB(gsl,      Gnew_gauge,         ,,$LIBDIR)
+AC_CHECK_LIB(gv_utils, gv_utils_adjust_date,,,$LIBDIR)
+
+# Check for RSL now, the other libs are order independant; check a variety of aux libs.
+# Disable cache.
+L=""
+unset ac_cv_lib_rsl_RSL_print_version
+AC_CHECK_LIB(rsl,      RSL_print_version,
+             L="-lrsl",
+             unset ac_cv_lib_rsl_RSL_print_version,
+             $LIBDIR)
+if test "$L" = ""; then
+AC_CHECK_LIB(rsl,      RSL_print_version,
+             L="-lrsl -letor",
+             unset ac_cv_lib_rsl_RSL_print_version,
+             $LIBDIR -letor)
+fi
+
+LIBS="$L $LIBS"
+L=""
+
+AC_CHECK_LIB(etor,      RSL_to_EDGE, , , $LIBDIR)
+
+LIBS="$LIBDIR $LIBS"
+
+AC_CONFIG_FILES(Makefile)
+AC_OUTPUT

@@ -1,0 +1,198 @@
+#! /usr/bin/perl
+#-+-Perl-+-
+#
+# merge_2nd_zr_intermediate_files -
+#    Combines multiple 2nd zr intermediate files (ASCII) into one big file.
+#    The result file will not be sorted.
+#
+#
+#  This script will exit with one of the following codes: 
+#        -2 --  Program was aborted by '^C'.
+#        -1 --  When there is failure.
+#         0 --  Everything is successful.
+#
+#--------------------------------------------------------------------------
+#
+# By:
+#
+#     Ngoc-Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA-GSFC/TRMM Office
+#     nguyen@trmm.gsfc.nasa.gov
+#     April 1, 1998
+# 
+#     Copyright (C) 1998
+#
+#***************************************************************************
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$PROG_VERSION = "build_zr_table-v1.14";
+print STDERR "Which program: $0\n";
+print STDERR "Version: $PROG_VERSION\n";
+
+@infile_list = ();
+$outfile = "";
+# PRocess arguments.
+do process_args(*ARGV, *infile_list, *outfile);
+$this_program_tmp_prefix = "zrmerge_file".$$;
+# Merge files
+$tmp_outfile = $this_program_tmp_prefix."_outfile"; # THis file contains the merged data
+
+                                   # without the header info.
+print STDERR "infiles: <@infile_list>\n";
+print STDERR "outfile: $outfile\n";
+
+open(TMP_OUTFILE, ">".$tmp_outfile) || return -1;
+$stime_header_line = "";
+$etime_header_line = "";
+local($etime, $stime) = 0;
+@save_header = ();
+$save_stime = 0;
+$save_etime = 0;
+for ($i = 0; $i <= $#infile_list; $i++) {
+	next if (!(-e $infile_list[$i]) || (-z $infile_list[$i]));
+	open(INFILE, $infile_list[$i]) || next;
+	local(@lines) = <INFILE>;
+	close(INFILE);
+    # Save the header info.
+	# Append the table's VOS entries to a tmp file.
+	# Find the start and end Date and time in the header section and save
+    # them for used when creating the outfile.
+	# 
+	local($invalid_header) = 1;  # Set to 0 when see 'Table begins:' 
+	@header = ();
+	$stime = 0;
+	$etime = 0;
+	while (@lines) {
+		local($line) = shift @lines;
+		if ($line =~ /^Table begins:/) {
+			push(@header, $line);
+			$invalid_header = 0;  # Valid header 
+			last;
+		}
+		else {
+			# Set the new start date/time if applied. mm/dd/yy hh:mm:ss
+			if ($line =~ /\s*Start_date_time\s+\d+\/\d+\/\d+\s+\d+:\d+:\d+/) {
+				local($mon, $day, $yr, $hr, $min, $sec)= $line =~ /\s*Start_date_time\s+(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+):(\d+)/;
+				$new_stime = &date_time2seconds($hr, $min, $sec, $mon, $day, $yr);
+
+					
+				if ($save_stime == 0 ||
+					$new_stime < $save_stime) {
+					$stime_header_line = $line;
+					$stime = $new_stime;
+				}
+			}
+			# Set the new end date/time if applied. mm/dd/yy hh:mm:ss
+			elsif ($line =~ /\s*End_date_time\s+\d+\/\d+\/\d+\s+\d+:\d+:\d+/) {
+				local($mon, $day, $yr, $hr, $min, $sec)= $line =~ /\s*End_date_time\s+(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+):(\d+)/;
+				$new_etime = &date_time2seconds($hr, $min, $sec, $mon, $day, $yr);
+
+				if ($save_etime == 0 ||
+					$new_etime > $save_etime) {
+					$etime_header_line = $line;
+					$etime = $new_etime;
+				}
+			}
+
+			push(@header, $line);
+
+		}
+	}
+	if ($invalid_header == 1) {
+		$stime = 0;
+		$etime = 0;
+		@header = ();
+		# Skip this file; it's not a zr intermediate file.
+	}
+	else {
+		@save_header = @header;
+		if ($stime > 0) {
+			$save_stime = $stime;
+			$save_stime_header_line = $stime_header_line;
+		}
+		if ($etime > 0) {
+			$save_etime = $etime;
+			$save_etime_header_line = $etime_header_line;
+		}
+
+		# Data--append it to tmp file.
+		print TMP_OUTFILE join('',@lines);
+	}
+
+	
+} # For each input file
+close(TMP_OUTFILE);
+# Ready to create the output file.
+open (OUTFILE, ">$outfile") || (&clean_up() && exit(-1));
+# Write the header and the merged body from the tmp file to the outfile.
+# Modified the start and end date/time lines from the header with the correct
+# start and end date/time.
+@header = @save_header;
+$old_version = 1; # This is used to be compatible with old products.
+$non_comment_start = 1;
+while (@header) {
+	local($line) = shift @header;
+	if ($line =~ /\s*End_date_time\s+\d+\/\d+\/\d+\s+\d+:\d+:\d+/) {
+		print OUTFILE "$save_etime_header_line";
+	}
+	elsif ($line =~ /\s*Start_date_time\s+\d+\/\d+\/\d+\s+\d+:\d+:\d+/) {
+		print OUTFILE "$save_stime_header_line";
+	}
+	elsif ($line =~ /.+Created by:\s+.+/) {
+		$old_version = 0;
+		$line =~ s/(.+Created by:\s+)(.+)/$1 ${this_prog} (${PROG_VERSION})/;
+        print OUTFILE "$line";
+    }
+    elsif ($line =~ /.+Input file:.+/ ) {
+	local($infiles) = join(' ', @infile_list);
+        $line =~ s/(.+Input file)(:\s+)(.+)/$1s$2${infiles}/;
+        print OUTFILE "$line";
+    }
+    elsif ($line =~ /.*\s*Generated time.+/ ||
+		   $line =~ /^###/) {
+    }
+    elsif ($line =~ /^[^#]/) {
+	    if ($old_version && $non_comment_start == 1) {
+			local($infiles) = join(' ', @infile_list);
+			print OUTFILE "## File generation information:\n",
+			              "##    Created by:    $this_prog ($PROG_VERSION)\n",
+			              "##    Input files:   $infiles\n",
+                          "##\n";
+		}
+        $non_comment_start = 0;
+		print OUTFILE "$line";
+    }
+	else {
+		print OUTFILE "$line";
+	}
+}
+open(TMP_OUTFILE, "<$tmp_outfile") || (&clean_up() && exit(-1));
+print OUTFILE <TMP_OUTFILE>;
+close(TMP_OUTFILE);
+close (OUTFILE);
+do clean_up();
+print STDERR "$this_prog: Successful.\n" if ($verbose);
+exit(0);
+
+######################################################################
+sub usage {
+	print STDERR "Usage ($PROG_VERSION): Merge Multiple Second ZR Intermediate Files.\n";
+	print STDERR "    $this_prog infile [infile...] outfile\n",
+	             "   Note: The result file will not be sorted.\n";
+
+	exit(-1);
+}
+
+sub clean_up {
+	system("rm -r ".$this_program_tmp_prefix."*");
+}
+
+sub process_args {
+	local(*arglist, *infile_list, *outfile) = @_;
+	
+	do usage () if ($#arglist < 1);
+
+	@infile_list = @arglist[0..$#arglist-1];
+	$outfile = @arglist[$#arglist];
+}

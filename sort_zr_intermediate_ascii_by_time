@@ -1,0 +1,22 @@
+#!/bin/tcsh -f
+
+# Ignore the gauge number, just recognize the network.
+set sort_arg = "+1 -2 +2 -3 +3 -4"
+set outfile  = "x_all.sort"
+
+split -l10000 $*
+
+# Special case for xaa because it contains header information.
+perl -ne 'print; last if /Table begins:/' xaa > $outfile
+perl -ne 'if (/Table begins:/) { $found=1; next;}; print if $found;' xaa > xaa.new
+mv xaa.new xaa
+
+foreach f (x??)
+   sort -T . $sort_arg $f > $f.sort
+   rm $f
+end
+
+sort -T . -m $sort_arg x??.sort >> $outfile
+rm x??.sort
+cat $outfile
+rm "x_all.sort"

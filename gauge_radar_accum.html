@@ -1,0 +1,112 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr>
+<td><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>gauge_radar_accum.pl:&nbsp;</font></font></b>
+<br><b><font color="#800080"><font size=+1>Generate radar and gauge rain
+accumulations for each raintype.</font></font></b></td>
+</tr>
+</table></center>
+<b>Updated</b>: February 9, 1999.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+<b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp; Usage: gauge_radar_accum.pl
+[--correlation-index n]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[--negative]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[--Network]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[--tmean x]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[--Rainrate]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[--help]</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[radar_gauge_merge.ascii]</font></tt></b>
+<br><b><tt><font color="#B22222"></font></tt></b>&nbsp;
+<br><b><tt><font color="#B22222"></font></tt></b>&nbsp;
+<p>
+<hr WIDTH="100%">
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+Generate a table of R and G rain accumulations for each gauge for each
+rain type.&nbsp; Currently there are only two raintypes: Convective and
+Stratiform.&nbsp; The input file should be sorted with the program <a href="sort_zr_intermediate_ascii.html">sort_zr_intermediate_ascii</a>.
+<br>The output of this program is useful to <a href="gauge_gui.html">gauge_gui_main.pl</a>
+for graphical display of the rain accumulations over time and to the program
+<a href="r_over_g.html">r_over_g.pl</a>
+which generates a comprehensive R/G table for each gauge and for each raintype.
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Options</font></h3>
+<tt><font color="#000000">&nbsp;&nbsp; </font><b><font color="#B22222">--matrix-index
+n&nbsp; - </font><font color="#000000">Specify the matrix index (n) to
+plot.&nbsp; The matrix</font></b></tt>
+<br><b><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+contains the radar to gauge correlations, it is a 3x3</font></tt></b>
+<br><b><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+matrix with the center being over the gauge.</font></tt></b>
+<br><b><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Usually, 0 through 7 for the 3 by 3 matrix.</font></tt></b>
+<br><b><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Default = 4 (this is the center).</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp; --negative&nbsp;&nbsp; -
+</font><font color="#000000">Accumulate negative gauge values.&nbsp; Negative</font></tt></b>
+<br><b><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+numbers are suspect, however, they're good for</font></tt></b>
+<br><b><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+rain totals.&nbsp; In other words, INCLUDE negative gauge values.</font></tt></b>
+<br><b><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Default: Use positive gauge values only.</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp; --Network&nbsp;&nbsp;&nbsp;
+- </font><font color="#000000">Accumulate for entire network.</font></tt></b>
+<br><b><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Default: accumulate for each gauge.</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp; --tmean n&nbsp;&nbsp;&nbsp;
+- </font><font color="#000000">Number of gauge measurements to average.&nbsp;
+Default: All.</font></tt></b>
+<br><b><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'n' is typically [5..15] and odd.</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp; --Rainrate&nbsp;&nbsp; -
+</font><font color="#000000">Data is already in mm/hr.&nbsp; Default: treat
+data as dBZ.</font></tt></b>
+<br><b><tt><font color="#B22222">&nbsp;&nbsp; --help&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+- </font><font color="#000000">Print this usage.</font></tt></b>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Input</font></h3>
+<font color="#000000">STDIN or the merged radar and gauge file generated
+by <a href="merge_radarNgauge_data.html">merge_radarNgauge_data</a>.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Output</font></h3>
+<font color="#000000">A table of R and G accumulations suitable to <a href="gauge_gui.html">gauge_gui_main.pl</a>
+or <a href="r_over_g.html">r_over_g.pl</a>.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">See also</font></h3>
+<font color="#000000"><a href="automatic_zr.html">automatic_zr.pl</a>,
+<a href="gauge_radar_accum.html">gauge_radar_accum.pl</a>,
+<a href="gauge_gui.html">gauge_gui_main.pl</a>.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Author</font></h3>
+John H. Merritt, SM&amp;A Corp.<i>, NASA/GSFC/TRMM Office</i>
+</body>
+</html>

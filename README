@@ -1,0 +1,244 @@
+README for build_zr_table v1.14.   Released: September 8, 2003
+
+This software package contains the programs necessary for building ZR tables.
+These ZR tables are stored as ASCII format in one file. The ZR tables contain
+information regarding the type of rain classifications for processing 2A-53 
+product. 2A-53 or rain rate product is the second level of GVS. 
+
+The construction of ZR tables requires GVS' 2A-54 and 2A-55 products along 
+with the gauge data.  It involves several steps. See 'zr.html' for more detail.
+
+This package contains:
+
+  Available Programs:
+  ------------------
+  1st ZR Intermediate File:
+  * get_radar_data_over_gauge     -- Extract radar data over rain gauge from 
+                                     GV granule files.
+  * first2ascii                   -- Convert the first intermediate ZR file
+                                     in GDBM to ASCII format.
+
+  2nd ZR Intermediate File:
+  * merge_radarNgauge_data        -- Build the second intermediate ZR file.
+  * sort_zr_intermediate_ascii    -- Sort either the 1st or 2nd intermediate 
+                                     file.
+  * sort_zr_intermediate_ascii_by_time   -- Sort intermediate file by time
+                                            ignoring the gauge number. 
+                                            Basically, sort by time for a 
+                                            gauge network.
+                                            See gauge_gui_main.pl.
+
+  * merge_2nd_zr_intermediate_files 
+                                  -- Combine multiple second zr intermediate
+                                     files into one file.
+
+  Gauge QC:
+  * gauge_qc.pl                   -- Generate correlation coefficients
+                                     between radar and gauge rain rates.
+  * gauge_radar_accum.pl          -- Generate gauge and radar rain
+                                     accumulations as a function of time.
+  * gauge_filter.pl               -- Filter specific gauges for specific
+                                     times from the second intermediate 
+                                     file.
+  * gauge_radar_nonzero.pl        -- Filter all entries where the gauge
+                                     data has zero for 5 min window about
+                                     the center.  This will eliminate many
+                                     entries from the second intermediate
+                                     file.  This is the first step of the 
+                                     gauge_qc.pl program, anyway.
+  * gauge_radar_plot_filter.pl    -- Generate plot data.  Generates both
+                                     the gauge and radar plot data and
+                                     a difference plot dataset.  The output
+                                     is used by gnuplot via 'accum_plot.cmd'
+  * gauge_gui_main.pl             -- An Xforms interface that runs several
+                                     programs and displays the plot data.
+  * gauge_radar_plot_batch.pl     -- Generates postscript files of rain
+                                     accumulations for each gauge.  Input
+                                     is the merged ascii (second intermediate)
+                                     file.  You can view with 'gs Gauge*.ps'
+                                     or send to the printer 'lpr Gauge*.ps'.
+                                     This program does what gauge_gui_main.pl
+                                     does, but, all at once.
+
+  * automatic_zr.pl               -- TOP LEVEL: Generate ZR table.
+                                     Perform QC, gauge filtering,
+                                     computing R/G and output the ZR table.
+
+  * automatic_qc.pl               -- Perform automatic quality control
+                                     of gauges.  The output is a gauge
+                                     filter file suitable for gauge_filer.pl.
+
+  * eyalqc                        -- MAIN gauge QC program, as of DEC 23, 1998.
+                                     Invoked by 'automatic_qc.pl'
+
+  * make_gauge_filter_file.pl     -- Using the output of
+                                     automatic_contig_match.pl, print out
+                                     the filter file (cron-like) entries
+                                     that gauge_filter.pl will use.
+
+  ZR tables:
+  * build_zr_table                -- Construct a ZR table using a command line
+                                     interface.  This is the program of choice.
+  * build_pmm_zr_table            -- Construct a ZR table.
+  * scale_zr_table                -- Scale ZR table.
+  * build_zr_histo                -- Construct ZR histograms
+  
+  
+  Gauge DB:
+  * build_gauge_db                -- Build the gauge database.
+  * query_gauge_db                -- Query rain rates from gauge database.
+  * validate_gauge_db             -- Check if the gauge db is correctly created.
+
+  Production Scripts:
+  * process_first_zr_inter_product_for_non_hdf_files
+                                  -- Extract radar data over gauge for either
+                                     UF or raw radar data files from either
+                                     disk, CD, or tape.
+
+  * process_first_zr_inter_product_for_tape
+                                  -- Extract radar data over rain gauge for 
+                                     a whole tape.
+  * process_first_zr_inter_product_for_tapes
+                                  -- Extract radar data over rain gauge for 
+                                     multiple tapes.
+
+  GUI graphics:
+  * gauge_gui.fd                  -- XForms design file specifying gui
+                                     widget layout.  Use
+                                     'fdesign -perl gauge_gui'
+
+  * gauge_gui_main.pl             -- Mainline for GUI.  See above.
+
+  Documentation:
+  -------------
+  * zr.html
+
+  Data files:
+  ----------
+  * accum_plot.cmd
+
+SOFTWARE REQUIREMENTS:
+=====================
+1. The required libraries are:
+   Note:  This product is compatible with the current or future releases
+          of the libraries below unless specified otherwise; however, it is
+          not compatible with the previous releases. Please contact the 
+          owner of those software for any update with bug fixes.
+
+    - gvs-v4.1 (Just the source located in $gvs/src/2A-53/ver4 and
+                codes for 2A-54 and 2A-55),
+	     gv_utils-v1.4.tgz, 
+         gvs_production-v3.9.tgz,
+         gdbm-1.7.3.tar.gz, and
+         gsl-v1.1.tgz --    Obtain via anonymous ftp to 
+                     trmm.gsfc.nasa.gov in pub/software
+
+    - TSDIS toolkit 4.5r1 -- at http://tsdis.gsfc.nasa.gov/tsdis/tsdistk.html.
+
+    - HDF4.0r1p1 -- Obtain via anonymous ftp to ftp.ncsa.uiuc.edu in HDF
+
+	- Xforms4Perl-0.8.4 -- Anonymous ftp to trmm.gsfc.nasa.gov in pub/software.
+
+2.  The GNU package(s) needed to run script(s) are available via ftp to
+    ftp.uu.net. The package(s) are:
+    perl
+
+
+4. Compiler:  C. GNU compiler is acceptable.
+   
+5. Flatform:  HP, SGI, SUN, or Linux 
+
+
+INSTRUCTIONS:
+============
+1. Install the required software.
+
+2. configure
+   make install
+
+3. Set the shell environment variable TSDISTK to where you installed TSDIS 
+   toolkit package and GVS_DB_PATH to where you installed the gauge data.
+
+
+EXECUTION NOTES:
+================
+
+1. Have access to the executable files located in this directory.
+
+2. Have access to the following UNIX commands: uniq, egrep, sort, grep, head.
+
+3. To construct a ZR table, see 'zr.html' for instructions.
+
+4. This is for comparison of 2A-53 and gauge data.
+
+    Execute the following to generate 2A-53/gauge plots:
+  
+         get_2A53_data_over_gauge 2A53.980207.1.MELB.1.HDF zzzz.gdbm
+            (Execute the above for as many 2A-53 granules you want.
+             Data is added to zzzz.gdbm)
+  
+         first2ascii zzzz.gdbm > zzzz.ascii
+  
+         merge_radarNgauge_data -f /rain2/merritt/melb_gauge.gdbm zzzz.ascii zzzz_2nd.ascii
+  
+     --<Run automatic QC.>--
+         automatic_qc.pl zzzz_2nd.ascii > gauge.filter
+
+     --<Filter out unwanted gauges; this is known from previous QC.>--
+         gauge_filter.pl -f gauge.filter zzzz_2nd.ascii > zzzz_3rd.ascii
+
+     --<Now for the plotting>--
+  
+         gauge_radar_plot_batch.pl -f gaugefilter.file -R zzzz_3rd.ascii
+            -or-
+         gauge_gui_main.pl     (interactive: use zzzz_3rd.ascii)
+
+5. Making images of the plots.
+
+   After running 'gauge_radar_plot_batch.pl' to create a postscript file,
+   run the following:
+
+   gs -q -dBATCH -dNOPAUSE -sDEVICE=ppmraw -sOutputFile=- Gauge_SFL_103.ps \
+   | pnmrotate -90 | ppmtogif > Gauge_SFL_103.gif
+
+
+
+CONTRIBUTORS/COMPONENTS:
+=======================
+
+get_radar_data_over_gauge: 
+  * Mike Kolander, Space Applications Corporation, NASA/GSFC/TRMM Office
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+  * Ngoc-Thuy Nguyen, Science Systems and Applications Inc., NASA/GSFC/TRMM Office
+
+merge_radarNgauge_data:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+  * Ngoc-Thuy Nguyen, Science Systems and Applications Inc., NASA/GSFC/TRMM Office
+
+Gauge QC'ing Programs:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+
+build_zr_table:
+  * Mike Kolander, Space Applications Corporation, NASA/GSFC/TRMM Office
+
+Supporting programs:
+ - first2ascii:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+
+ - build_gauge_db, query_gauge_db, validate_gauge_db:
+    * Ngoc-Thuy Nguyen, Science Systems and Applications Inc., NASA/GSFC/TRMM Office
+    
+ - Production scripts for automatic extraction of radar data over gauge for
+   a whole tape, multiple tapes, and a list of UF or raw radar data files.
+    * Ngoc-Thuy Nguyen, Science Systems and Applications Inc., NASA/GSFC/TRMM Office
+ 
+Documentation and software packaging:
+  * John H. Merritt, Space Applications Corporation, NASA/GSFC/TRMM Office
+  * Ngoc-Thuy Nguyen, Science Systems and Applications Inc., NASA/GSFC/TRMM Office
+
+
+
+QUESTIONS:
+=========
+
+Please contact John H. Merritt, via email at John.H.Merritt@gsfc.nasa.gov.

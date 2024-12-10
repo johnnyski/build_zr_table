@@ -1,0 +1,93 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr>
+<td><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>build_pmm_zr_table:&nbsp;</font></font></b>
+<br><b><font color="#800080"><font size=+1>Match Z/R/Classification Pairs</font></font></b></td>
+</tr>
+</table></center>
+<b>Updated</b>: December 23, 1998.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<pre><b><font color="#B22222">&nbsp;&nbsp;&nbsp; build_pmm_zr_tables [-v] [-c] [-h <i>height</i>] [-t <i>temporal_gauge_window_duration</i>] [-o <i>offset_temporal_gauge_window</i>]&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-r <i>r1</i>,<i>r2</i>,...] [-d] <i>infile outfile</i></font></b>
+
+
+<hr WIDTH="100%"></pre>
+
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<font color="#000000">This program is the final processing step for constructing
+ZR table(s). It matches Z/R/classification pairs from the input file which
+is the result of <a href="merge_radarNgauge_data.html">merge_radarNgauge_data</a>.
+It produces ZR tables based on: 1) Rain classification at the raingauge
+and 2) Range of the raingauge from the radar site. For example, given two
+rain types (convective &amp; stratiform) and three range intervals ([0,50],
+[50,100], [100,150]),</font> <font color="#000000">then six (3x2) distinct
+ZR tables will be produced. All ZR tables will be stored in one file.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Options</font></h3>
+<b><font color="#B22222">-v: </font></b><font color="#000000">verbose execution.</font>
+<br><b><font color="#993300">-c:</font></b> Specify this flag if&nbsp;
+want to use only the cell over gauge from spatial gauge window. Note: A
+cell has area 4km^2 (2km x 2km) (Default: use 9(=3x3) cells from one height)
+<br><b><font color="#993300">-h:</font></b> Specify height at either <i>1.5</i>
+or <i>3.0</i>: Use window cells from specified height(km) from 2A-55. (Default:
+range-dependant)
+<br><b><font color="#993300">-t:</font></b> temporal gauge window interval
+in minutes. (Default: 6) .
+<br><b><font color="#993300">-o:</font></b> Offset temporal gauge window
+from the input file's temporal window center in minutes. (Default: 0).
+<br><b><font color="#B22222">-r r1,r2,...</font></b><font color="#000000">.
+Specifies desired range intervals in KM for ZR tables where r1, r2,...,
+rN are: [0,r1], [r1,r2], ..., [r(N-1),150]. rN &lt;= 150.</font>
+<br><b><font color="#B22222">-d: </font></b>Disregard rain classification.
+Lump all classes together.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Input</font></h3>
+<b><font color="#B22222">infile </font></b><font color="#000000">is the
+merged radar gauge file produced by <a href="merge_radarNgauge_data.html">merge_radarNgauge_data</a>..&nbsp;
+Note: The merged radar gauge file should be qc'ed before applying to this
+program.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Temporary Files or Directories</font></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Output</font></h3>
+<b><font color="#B22222">outfile </font></b><font color="#000000">will
+contain the produced ZR table(s). Multiple ZR tables are possible; see
+option </font><b><font color="#B22222">-r</font></b><font color="#000000">
+above.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Return Value</font></h3>
+<b><font color="#B22222">build_pmm_zr_table</font></b><font color="#000000">
+returns 0 upon successful completion; 2 upon interruption; non-zero, otherwise.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Author</font></h3>
+Mike Kolander, <i>Space Applications Corporation (SAC), NASA/GSFC/TRMM
+Office</i>
+</body>
+</html>

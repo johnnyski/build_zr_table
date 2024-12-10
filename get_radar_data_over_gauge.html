@@ -1,0 +1,116 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr>
+<td><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>get_radar_data_over_gauge:&nbsp;</font></font></b>
+<br><b><font color="#800080"><font size=+1>Extract Radar Windows and Convective/Stratiform
+Classifications</font></font></b></td>
+</tr>
+</table></center>
+<b>Updated</b>: April 21, 1998.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<pre><b><font color="#B22222">&nbsp;&nbsp;&nbsp; get_radar_data_over_gauge&nbsp; [-v] [-S <i>site_name</i>] [-x <i>gauge_win_xmax</i>] [-y <i>gauge_win_ymax</i>]&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-c <i>rain_class_type</i>] [-g <i>gauge_locations_top_dir</i>]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i>2A-54_granule_hdf</i> <i>2A-55_granule_hdf</i> <i>first_zr_intermediate_outfile</i></font></b>
+
+
+
+
+
+<hr WIDTH="100%"></pre>
+
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<font color="#000000">This program corresponds to the first step for constructing
+ZR tables. It extracts radar windows and convective/stratiform classifications
+using two carpis high. If rain classification type is conv/strat, then
+the 2A-54 convective/stratiform classification will be used. It creates
+a first ZR intermediate file which will be used by the radar/gauge merging
+program, <a href="merge_radarNgauge_data.html">merge_radarNgauge_data</a></font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Options</font></h3>
+<b><font color="#B22222">-S</font></b> Specify site name. Default: get
+from 2A-55 file.
+<br><b><font color="#B22222">-x</font></b> Specify the X length of the
+gauge window in km. Default: 4.0
+<br><b><font color="#B22222">-y</font></b> Specify the Y length of the
+gauge window in km. Default: 4.0
+<br><b><font color="#B22222">-c</font></b> Specify rain classifications
+number (<i><tt>Uniform</tt></i>; <i><tt>conv/strat</tt></i>). Default:
+<i><tt>conv/strat</tt></i>
+<br><b><font color="#B22222">-g</font></b> Top directory of gauge site
+locations data. Default: <i>$GVS_DATA_PATH.</i> The site locations data
+files are actually in a subdirectory called <i>sitelist</i> but don't specify
+that here.&nbsp; Specify the directory where 'sitelist/' resides. The default
+value for <i>$GVS_DATA_PATH </i>is <i>/usr/local/trmm/GVBOX/data</i>.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Inputs</font></h3>
+
+<ul>
+<li>
+<b><i><tt><font color="#B22222">2A-54_granule_hdf</font></tt></i></b> Cartesian_CS_map
+for one granule in HDF.</li>
+
+<li>
+<b><i><tt><font color="#B22222">2A-55_granule_hdf</font></tt></i></b> 3-D
+reflectivities for one granule in HDF.</li>
+
+<li>
+Gauge site locations information. See option <b><font color="#B22222">-g</font></b>
+in the Options section.</li>
+</ul>
+
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Temporary Files or Directories</font></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Output</font></h3>
+<b><i><tt><font color="#B22222">first_zr_intermediate_outfile</font></tt></i></b>
+This file will be appended or created if it does not exist. It contains
+radar data over gauges along with rain types.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Return Value</font></h3>
+<b><font color="#B22222">get_radar_data_over_gauge </font></b><font color="#000000">returns
+0 upon successful completion; 2 upon interruption; non-zero, otherwise.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Authors</font></h3>
+
+<ul>
+<li>
+Mike Kolander, <i>Space Applications Corporation (SAC), NASA/GSFC/TRMM
+Office</i></li>
+
+<li>
+<font color="#000000">John H. Merritt, <i>Space Applications Corporation
+(SAC),</i> <i>NASA/GSFC/TRMM Office</i></font></li>
+
+<li>
+Ngoc-Thuy Nguyen, <i>Science Systems and Applications Inc.(SSAI), NASA/GSFC/TRMM
+Office</i></li>
+</ul>
+
+</body>
+</html>

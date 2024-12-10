@@ -1,0 +1,339 @@
+#! /usr/bin/perl
+#-+-Perl-+-
+#
+#
+# process_first_zr_inter_product_for_non_hdf_files: Process radar data over 
+#    gauge extraction for UF files or raw radar data.
+#    
+#    Calls  'all_tape_level_1n2' (to produce 1C-51, 2A-54, and 2A-55 products),
+#           then 'process_first_zr_inter_product_for_tape'
+#           to produce the first zr intermediate product.
+#
+#
+#  This script will exit with one of the following codes: 
+#        -2 --  Program was aborted by '^C'.
+#        -1 --  When there is failure.
+#         0 --  Everything is successful.
+#
+# Note: 1C-51 products will be removed once the script finishes
+#       producing all of 2A-54 and 2A-55 products if user doesn't want to 
+#       keep them on disk.
+#       2A-54 and 2A-55 products will be removed at the end if user doesn't
+#       want to keep them on disk.
+#
+#--------------------------------------------------------------------------
+#
+# By:
+#
+#     Ngoc-Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA-GSFC/TRMM Office
+#     nguyen@trmm.gsfc.nasa.gov
+#     March 19, 1998
+# 
+#     Copyright (C) 1998
+#
+#***************************************************************************
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$PROG_VERSION = "build_zr_table-v1.14";
+print STDERR "Which program: $0\n";
+print STDERR "Version: $PROG_VERSION\n";
+
+# Set default
+$first_time_exit_handler = 1;
+$tapeid = "";   # Default
+$device = "";
+$input_dir = $save_curr_dir;
+$start_infile_opt = "";
+$last_infile_opt = "";
+$keep_1C51_products = 0;
+$keep_2A54_2A55_products = 0;
+$max_num_infiles_per_hour = 0;
+$option_file_zr1_opt = "";
+
+$this_prog_dirname = "zr_$$/";
+$top_working_dir = $save_curr_dir.$this_prog_dirname;
+$top_output_dir = $save_curr_dir;
+
+
+# PRocess arguments.
+do process_args(@ARGV);
+do do_system_call("mkdir -p $top_working_dir");
+
+$output_dir = $top_output_dir.$this_prog_dirname;
+do do_system_call("mkdir -p $output_dir") if (!(-d $output_dir));
+
+$p2A54_2A55_top_dir = $output_dir;
+# The product dir name should follow the naming convention of
+# 'all_tape_level_1n2'.
+$plevel1_dir = $output_dir.&get_gvs_dir_name("level_1", $tapeid);
+$p2A54_dir = $p2A54_2A55_top_dir.&get_gvs_dir_name("2A-54", $tapeid);
+$p2A55_dir = $p2A54_2A55_top_dir.&get_gvs_dir_name("2A-55", $tapeid);
+
+print STDERR "$this_prog: Will work in <$top_working_dir>...\n";
+chdir $top_working_dir;  #
+
+
+print STDERR "Will keep GV products under <$output_dir>\n"
+	if ($keep_1C51_products || $keep_2A54_2A55_products );
+
+if ($option_file_level_1 eq "") {
+	$option_file_level_1 = $top_working_dir."level_1.option";
+	do do_system_call("echo -S -B> $option_file_level_1");
+}
+if ($option_file_2A54 eq "") {
+	$option_file_2A54 = $top_working_dir."2A54.option";
+	do do_system_call("touch $option_file_2A54");
+}
+
+	
+if ($option_file_2A55 eq "") {
+	$option_file_2A55 = $top_working_dir."2A55.option";
+	do do_system_call("touch $option_file_2A55");
+}
+
+
+#   Runs:   
+#          'all_tape_level_1n2', then
+#          'process_first_zr_inter_product_for_tape'
+# Outfile will be appended if it exists.
+# Note: Program will exit if any of the above program fails.
+
+$rc = 0;
+
+# Producing 1C-51, 2A-54, 2A-55 granule products in
+# $output_dir/gvs_<product>_<tapeid>.
+$max_num_infiles_per_hour_opt = "-max_num_infiles_per_hour $max_num_infiles_per_hour" if $max_num_infiles_per_hour > 0;
+$cmd = "all_tape_level_1n2 $device $tapeid -raw_dir $input_dir -w $top_working_dir $gunn_point_darwin_flag $start_infile_opt $last_infile_opt -do_not_send_mail -not_report_monitorps -o $output_dir level_1  $option_file_level_1 2A-54 $option_file_2A54 2A-55 $option_file_2A55";
+
+print STDERR "$this_prog: Executing <$cmd>...\n";
+$rc = &do_system_call($cmd);
+if ($rc < 0) {
+	print STDERR "$this_prog: Failed executing <$cmd>\n";
+	do clean_up();
+	exit(-1);
+}
+
+
+
+# Remove 1C products if not want to keep them -- to save space.
+if ($keep_1C51_products == 0 && -d $plevel1_dir) {
+	# Remove 1C51 products.
+	print STDERR "$this_prog: Removing <$plevel1_dir>...\n";
+	do do_system_call("rm -r $plevel1_dir");
+}
+
+# Extract radar data over gauges from 2A-54, 2A-55 products.
+$cmd = "process_first_zr_inter_product_for_tape -i $p2A54_2A55_top_dir -f $zr1_outfile $option_file_zr1_opt $tapeid";
+print STDERR "$this_prog: Executing <$cmd>...\n";
+$rc = &do_system_call($cmd);
+if ($rc < 0) {
+	print STDERR "$this_prog: Failed executing <$cmd>\n";
+	do clean_up();
+	exit(-1);
+}
+
+do clean_up();
+print STDERR "$this_prog: Successful.\n";
+exit(0);
+
+########################### Subroutines ################################
+
+sub usage {
+	print STDERR "Usage ($PROG_VERSION): Radar Data over Gauge Extraction for UF or Raw Radar Files.\n";
+	print STDERR "    $this_prog \n",
+                 "\tdevice tape_id [-i input_dir] [-k1|-k2 [-o output_dir]] \n",
+	             "\t[-start_infile  {filename|file_sequential_num}] \n",
+	             "\t[-last_infile   {filename|file_sequential_num}] \n",
+                 "\t[-max_num_infiles_per_hour number]\n",
+	             "\t[-o1 level_1_option_file] \n",
+                 "\t[-o4 2A54_option_file] \n",
+                 "\t[-o5 2A55_option_file] [-ozr1 zr1_option_file] outfile\n";
+	print STDERR " Where,\n",
+	             "  device:  Location of input data, i.e., disk, /dev/8mm1, CD,...\n",
+                 "  tapeid:  Specify tape label, i.e., kmlb001. \n",
+	             "  -i:      Specify the input dir. Specify this if data is not from tape.\n",
+                 "           Default: ./. Type 'all_tape_level_1' to see filename format.\n",
+	             "  -k1:     Keep 1C-51 products on disk.  Products are granules.\n",
+	             "  -k2:     Keep 2A-54 and 2A-55 products on disk. \n",
+                 "           Products are granules.\n",
+	             "  -o:      Specify the output dir for either 1C-51 or 2A-54 and 2A-55.\n",
+                 "           Default: ./.  This applies for option -k1 or -k2 only.\n",
+                 "  -start_infile: \n",
+                 "           Specify raw radar or UF file's name or sequential \n",
+                 "           number (non-UF file only) to start processing at. \n",
+                 "           Type 'all_tape_level_1' to see more detail in the Note section.\n",
+                 "  -last_infile: \n",
+                 "           Specify the last raw radar or UF file's name or sequential \n",
+                 "           number (non-UF file only) for processing. \n",
+                 "           Type 'all_tape_level_1' to see more detail in the Note section.\n",
+                 "  -max_num_infiles_per_hour:\n",
+                 "           Specify the max. number of input files in the same hour.\n",
+                 "           This is used only to determine when to compress 1C-51 products.\n",
+                 "           Default: 20.\n",
+                 "  -o1:     Specify the option filename for 'level_1'.\n",
+                 "  -o4:     Specify the option filename for '2A-54'.\n",
+                 "  -o5:     Specify the option filename for '2A-55'.\n",
+                 "  -ozr1:   Specify the option filename for 'get_radar_data_over_gauge'.\n",
+	             "  outfile: Specify filename for output. The file will be appended if it exists.\n";
+	print STDERR " Note: \n",
+                 "    * This script will process 1C-51, 2A-54, 2A-55, and data extraction.\n",
+                 "    * Make sure you have enough disk space for processing.\n"; 
+
+
+	exit(-1);
+
+}
+
+sub process_args {
+	local(@arglist) = @_;
+	local($str) = "";
+	do usage() if ($#arglist < 2);
+	$device  = shift @arglist;
+	$tapeid = shift @arglist;
+
+
+	if ($device =~ /^-/ || $tapeid =~ /^-/) {
+		do usage();
+	}
+	while ($#arglist >= 0) {
+		$str = shift @arglist;
+
+		if ($str eq "-i") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$input_dir = &change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+		elsif ($str eq "-k1") {
+			$keep_1C51_products = 1;
+			goto NEXT;
+		}
+		elsif ($str eq "-k2") {
+			$keep_2A54_2A55_products = 1;
+			goto NEXT;
+		}
+		elsif ($str eq "-o") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$top_output_dir = &change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+		elsif ($str eq "-start_infile") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$start_infile_opt = "-start_raw_file ".&change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+		elsif ($str eq "-last_infile") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$last_infile_opt = "-last_raw_file ".&change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+		elsif ($str eq "-max_num_infiles_per_hour") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$max_num_infiles_per_hour = $tmp_str;
+			goto NEXT;
+		}
+		elsif ($str eq "-o1") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$option_file_level_1 = &change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+		elsif ($str eq "-o4") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$option_file_2A54 = &change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+
+		elsif ($str eq "-o5") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$option_file_2A55 = &change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+		elsif ($str eq "-ozr1") {
+			local($tmp_str) = shift @arglist;
+			do  usage() if ($tmp_str eq "" || $tmp_str =~ /^\-/);
+			$option_file_zr1_opt = "-o ".&change2absolute_filename($save_curr_dir, $tmp_str);
+			goto NEXT;
+		}
+
+		next;
+
+NEXT:
+		$str = "";
+	}
+
+	$zr1_outfile = &change2absolute_filename($save_curr_dir, $str);
+
+	do usage() if ($zr1_outfile eq "");
+
+}
+
+
+sub do_system_call {
+	local($cmd) = @_;
+    # Return 1 for successful; -1, otherwise.
+    # Exit if interrupted.
+	local($rc) = 0;
+#print STDERR "CMD::::::<$cmd>\n\n";
+	system($cmd);
+	$status = $? >> 8;
+	exit(2) if ($status == -2 || $status ==254);
+	local($signal) = $? & 255;
+	return -1 if ($signal != 0 || $status == -1 || $status == 255);
+	return 1;
+}
+
+
+sub clean_up {
+	if ($keep_1C51_products == 0 && -d $plevel1_dir) {
+		# Remove 1C51 products.
+		print STDERR "$this_prog: Removing <$plevel1_dir>...\n";
+		do do_system_call("rm -r $plevel1_dir");
+	}
+	if ($keep_2A54_2A55_products == 0) {
+		# Remove 2A-54 & 2A-55 products
+		if (-d $p2A54_dir) {
+			print STDERR "$this_prog: Removing <$p2A54_dir>...\n";
+			do do_system_call("rm -r $p2A54_dir");
+		}
+		if (-d $p2A55_dir) {
+			print STDERR "$this_prog: Removing <$p2A55_dir>...\n";
+			do do_system_call("rm -r $p2A55_dir");
+		}
+	}
+	
+	chdir $save_curr_dir; # Go back to the original dir.
+	if ((($keep_2A54_2A55_products == 0 &&
+		 $keep_1C51_products == 0) ||
+		 $top_working_dir ne $output_dir) &&
+		-d $top_working_dir) {
+		print STDERR "$this_prog: Removing < $top_working_dir>...\n";
+		do do_system_call("rm -r  $top_working_dir");
+	}
+	
+} # clean_up
+
+sub doexit_handler {
+	local($signal) = @_;
+    # Ignore signals 
+	do ignore_catched_signals();
+	local($rc) = $SEVERE_ERROR_CODE;
+	if ($signal eq 'INT' || $signal eq 'KILL' || $signal eq 'STOP' ||
+		$signal == 9 || $signal == 2) {
+		$rc = $INTER_CODE;
+	}
+	if ($first_time_exit_handler) {
+		$first_time_exit_handler = 0;
+		print STDERR "$this_prog: Received signal <$signal>\n";
+		do clean_up();
+	}
+	exit($rc);
+}

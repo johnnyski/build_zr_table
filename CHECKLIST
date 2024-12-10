@@ -1,0 +1,35 @@
+Checklist for Making New Software Release
+-----------------------------------------
+
+Perform these steps to ensure a good distribution.
+
+1. emacs configure.in
+   Change the version number.
+
+2. emacs README
+   Change the version number + date.
+
+3. emacs CHANGES
+   Change the version number + date.
+
+4. netscape zr.html
+   Change the version number + date.
+
+5. autoreconf
+
+6. configure
+
+7. make
+
+8. make install
+   This will change the version in all scripts.
+
+9. cvs commit -m 'Ready for v1.xx'
+
+10. make dist
+
+11. ../to_ftp_archive build_zr_table-v1.xx.tgz
+
+12. mv build_zr_table-v1.9.tar.gz ../gvbox/packages/
+
+13. cvs tag v1_xx

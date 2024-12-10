@@ -1,0 +1,129 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en] (X11; U; Linux 2.0.32 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#C0C0C0" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+&nbsp;
+<center><table BORDER=5 CELLSPACING=5 CELLPADDING=5 WIDTH="100%" >
+<tr>
+<td><img SRC="zr_logo.gif" height=100 width=256></td>
+
+<td><b><font color="#000080"><font size=+2>gauge_qc.pl:&nbsp;</font></font></b>
+<br><b><font color="#800080"><font size=+1>Quality Control for gauge data.</font></font></b></td>
+</tr>
+</table></center>
+<b>Updated</b>: June 12, 1998.
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Synopsis</font></h3>
+
+<pre><b><font color="#B22222">&nbsp;&nbsp;&nbsp; gauge_qc.pl [second_intermediate_file.ascii]</font></b>
+
+<hr WIDTH="100%"></pre>
+
+<h3>
+<b><font color="#000080">Description</font></b></h3>
+<font color="#FF0000">Do not confuse this program with <a href="automatic_qc.html">automatic_qc.pl</a>.&nbsp;
+It is not the same.&nbsp; This program is used within the graphic interface&nbsp;
+and provides a simple method to calculate rainrates.</font>
+<p><font color="#000000">Compute the linear correlation between the derrived
+rain rate using a simple power-law (300R^1.4) and the rain rate that the
+gauge reports.</font>
+<p><font color="#000000">Algorithm was submitted by Eyal Amitai / <a href="mailto:eyal@trmm.gsfc.nasa.gov">eyal@trmm.gsfc.nasa.gov</a></font>
+<br>&nbsp;
+<h4>
+<font color="#000000">Definition</font></h4>
+<font color="#000000">Window - a line in the merge data file, typically
+referred to as the second intermediate file in the build_zr_table package,
+which includes:</font>
+<ol>
+<li>
+<font color="#000000">9 reflectivity (dBZ) values <tt>Zj</tt> <tt>(j=1..9)</tt>,
+where<tt> Z5</tt> is at the window center.</font></li>
+
+<li>
+<font color="#000000">11 one minute rain rate (mm/hr) values <tt>R1,...,R11,</tt>
+where <tt>R6</tt> is at the time of the scan.</font></li>
+</ol>
+<font color="#000000">For each rain gauge location, calculate correlation
+coefficient (r) between each of the 9 radar pixels and the average 5-minute
+gauge measured rain rate centered at the time of the scan.&nbsp; Each statistical
+value represents one radar pixel location for the whole period, say one
+month.&nbsp; No sorting is necessary.</font>
+<p><font color="#000000">&nbsp;<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+SUM( (Xi - Xmean) (Yi - Ymean) )</tt></font>
+<br><tt><font color="#000000">&nbsp;&nbsp; rj =--------------------------------------------------------</font></tt>
+<br><tt><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+sqrt(SUM( (Xi - Xmean)^2)) * sqrt(SUM( (Yi - Ymean)^2))</font></tt>
+<p><font color="#000000"><tt>n&nbsp;&nbsp; -</tt> total number of windows
+used for a given gauge.</font>
+<br><font color="#000000"><tt>Xij -</tt> the rain rate as driven from the
+reflectivity at location <tt>j (1..9)</tt></font> <font color="#000000">for
+window number <tt>i (1..n)</tt> assuming a nominal fixed Z-R relationship.</font>
+<p><font color="#000000"><tt>Xij = {(10^(Zij/10)/A}^(1/B)</tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Where, eg., <tt>A=300, B=1.4</tt>.</font>
+<p><font color="#000000"><tt>Yi&nbsp; -</tt> the average 5-minute gauge
+measured rain rate centered at the time</font>
+<br><font color="#000000">&nbsp;of the scan.</font>
+<br><font color="#000000"><tt>Yi&nbsp; = Sum(R4+R6+R7+R8+R9)/5&nbsp;</tt>
+(start w/ <tt>t=5</tt> minutes, but it is flexible)</font>
+<br>&nbsp;
+<br>&nbsp;
+<p><font color="#000000">Constraints:</font>
+<ol>
+<li>
+<font color="#000000">Windows at range of 100km or less.</font></li>
+
+<li>
+<font color="#000000">Windows where non of the 5 1-minute gauge rain rate
+values is negative.</font></li>
+
+<li>
+<font color="#000000">Pairs of gauge and radar data where the rain type
+exists.&nbsp; Therefore,</font> <font color="#000000"><tt>n</tt> is the
+actual number of pairs that were used for the j location.</font></li>
+</ol>
+
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Options</font></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Input</font></h3>
+<b><font color="#B22222">second_intermediate_file.ascii</font></b><font color="#000000">is
+the ascii file representing the merged radar and gauge dataset.&nbsp; Specifying
+this file is optional, in which case, stdin will be used.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Temporary Files or Directories</font></h3>
+<font color="#000000">None.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Output</font></h3>
+<font color="#000000">For each gauge location, a matrix of 9 correlation
+values corresponding to the 9 reflectivity pixels.&nbsp; Each matrix&nbsp;
+should come w/ a header line which includes: gauge ID number,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+range from radar, start/end date, total amount measured by the gauge (Sum(Yi)/6).
+contain the produced ZR table(s). Multiple ZR tables are possible; see
+option </font><b><font color="#B22222">-r</font></b><font color="#000000">
+above.</font>
+<p>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Return Value</font></h3>
+<font color="#000000">None.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<font color="#000080">Author</font></h3>
+John H. Merritt, <i>Space Applications Corporation (SAC), NASA/GSFC/TRMM
+Office</i>
+</body>
+</html>

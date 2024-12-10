@@ -1,0 +1,750 @@
+#! /usr/bin/perl
+#
+#
+# make_when_table:
+#     Construct when table for user specified time range and send 
+#     results to STDOUT.
+#
+#
+#----------------------------------------------------------------------
+#
+# by: Ngoc-Thuy Nguyen
+#     Science Systems and Applications, Inc. (SSAI)
+#     NASA/GSFC/TRMM Office
+#     nguyen@trmm.gsfc.nasa.gov
+#    
+#     Copyright 1998 NASA/GSFC/TRMM Office
+#
+##########################################################################
+unshift (@INC, ".", "/usr/local/trmm/GVBOX/bin");
+do 'gv_utilities.pl';
+$PROG_VERSION = "build_zr_table-v1.14";
+
+# optional 
+$min1 = -1;
+$min2 = -1;
+$hr1 = -1;
+$hr2 = -1;
+$str = "";
+do process_argvs (*ARGV, *hr1, *min1, *mon1, *day1, *yr1, 
+	*hr2, *min2, *mon2, *day2, *yr2, *str);
+
+# construct cron's time from time range and output to stdout.
+#
+
+# The format of cron's line is:
+# MIN HOUR DAY MONTH YEAR 
+# where:
+# MIN      : * | range| 0-59
+# HOUR     : * | range | 0-23
+# DAY      : * | range | 1 - 31
+# MONTH    : * | range | 1 - 12
+# YEAR     : range | yyyy
+# Note: 
+#    *   :  Wild match.  This matches all possibilities.
+
+#
+
+
+@cron_time_lines = ();
+if ($hr1 == $hr2 && $mon1 == $mon2 &&
+	$day1 == $day2 && $yr1 == $yr2) {
+	# Same day
+	do same_hour_construct_cron_time ($hr1,$min1, $mon1, $day1, $yr1, 
+									  $hr2, $min2, $mon2, $day2, $yr2, 
+									  *cron_time_lines);
+}
+
+elsif ($mon1 == $mon2 && $day1 == $day2 && $yr1 == $yr2) {
+	# Same day
+	do same_day_construct_cron_time ($hr1,$min1, $mon1, $day1, $yr1, 
+									 $hr2, $min2, $mon2, $day2, $yr2, 
+									 *cron_time_lines);
+}
+elsif ($mon1 == $mon2 && $yr1 ==$yr2) {
+	# Same month
+	do same_month_construct_cron_time ($hr1,$min1, $mon1, $day1, $yr1, 
+									  $hr2, $min2, $mon2, $day2, $yr2, 
+									  *cron_time_lines);
+}
+elsif ($yr1 == $yr2) {
+	# Same year 
+	do same_year_construct_cron_time ($hr1,$min1, $mon1, $day1, $yr1, 
+									  $hr2, $min2, $mon2, $day2, $yr2, 
+									  *cron_time_lines);
+}
+else {
+	# Different years
+	do different_years_construct_cron_time ($hr1,$min1, $mon1, $day1, $yr1, 
+									  $hr2, $min2, $mon2, $day2, $yr2, 
+									  *cron_time_lines);
+}
+
+
+# Output cron time lines to stdout
+foreach $line (@cron_time_lines) {
+	print STDOUT $line, $str, "\n";
+}
+
+exit(0);
+
+########################### sub-routines#######################################
+sub process_argvs {
+	local(*argvs, *hr1, *min1, *mon1, *day1, *yr1, 
+		  *hr2, *min2, *mon2, *day2, *yr2, *str) = @_;
+	do usage($0) if ($#argvs < 2);
+
+	local($i) = 0;
+	local($date1) = $argvs[$i++];
+	local($time1) = $argvs[$i++] if ($argvs[$i] =~ /^\d+(:\d+)?$/);
+	local($date2) = $argvs[$i++];
+	local($time2) = $argvs[$i++] if ($argvs[$i] =~ /^\d+(:\d+)?$/);
+	for ($i; $i <= $#argvs; $i++) {
+		$str .= " $argvs[$i]";
+	}
+	# Put \ infront of "
+	$str =~ s/"/\\"/g; #"
+	
+
+	# date: mm/dd/yyyy
+	# time: [hh[:mm]]
+
+	if ($date1 !~ /(\d+)\/(\d+)\/(\d\d\d\d)/) {
+		print STDERR "Error: Invalid date format for time1.\n";
+		exit(-1);
+	}
+	($mon1, $day1, $yr1) = $date1 =~ /(\d+)\/(\d+)\/(\d\d\d\d)/;
+
+	if ($date2 !~ /(\d+)\/(\d+)\/(\d\d\d\d)/) {
+		print STDERR "Error: Invalid date format for time2.\n";
+		exit(-1);
+	}
+	($mon2, $day2, $yr2) = $date2 =~ /(\d+)\/(\d+)\/(\d\d\d\d)/;
+
+	if ($time1 ne "") {
+		if ($time1 =~ /(\d+):(\d+)/) {
+			($hr1, $min1) = $time1 =~ /(\d+):(\d+)/;
+		}
+		elsif ($time1 =~ /(\d+)/) {
+			$hr1 = $time1;
+		}
+		else {
+			print STDERR "Error: Invalid time format for time1.\n";
+			exit(-1);
+		}
+	}
+
+	if ($time2 ne "") {
+		if ($time2 =~ /(\d+):(\d+)/) {
+			($hr2, $min2) = $time2 =~ /(\d+):(\d+)/;
+		}
+		elsif ($time2 =~ /(\d+)/) {
+			$hr2 = $time2;
+		}
+		else {
+			print STDERR "Error: Invalid time format for time2.\n";
+			exit(-1);
+		}
+	}
+	if ($yr1 < 1000 || $yr2 < 1000) {
+		print STDERR "Error: Invalid year format.\n";
+	}
+	if ($yr1 > $yr2 ||
+		($mon1 > $mon2 && $yr1 == $yr2) ||
+		($day1 > $day2 && $mon1 == $mon2 && $yr1 == $yr2) ||
+		($hr1 > $hr2 && $day1 == $day2 && $mon1 == $mon2 && $yr1 == $yr2) ||
+		($min1 > $min2 && $hr1 == $hr2 && $day1 == $day2 && $mon1 == $mon2 && $yr1 == $yr2)) {
+		print STDERR "Error: Invalide time range.\n";
+		exit(-1);
+	}
+
+} # process_argvs(
+
+sub usage {
+	local($prog) = @_;
+	
+	print STDERR <<"EOF";
+Make When Tables for Time Range
+Usage ($PROG_VERSION):
+
+  $prog time1 time2 string
+
+  Where,
+   
+     time1, time2 -- mm/dd/yyyy [hh[:mm]]
+     string       -- any string.
+
+  OUTPUT
+     line's format: MIN HOUR DAY MONTH YEAR
+
+  Example:
+
+command> make_when_table 09/18/1998 5 1/22/1999 10 str1
+*       5-23    18      09      1998       str1
+*       *       19-30   09      1998       str1
+*       *       *       10-12   1998       str1
+*       *       1-21    1       1999       str1
+*       0-10    22      1       1999       str1
+
+EOF
+exit(-1);
+}
+
+
+sub same_hour_construct_cron_time {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+	# Construct cron time line(s) for same hour time range.
+    # Set  cron_time_lines
+	# Line 1: min1-min2   hr1    day1  mon1 yr1
+    #   or 1: 0-min2      hr1    day1  mon1 yr1   -- ommitted [min1]
+    #   or 1: min1-59     hr1    day1  mon1 yr1   -- ommitted [min2]
+    #   or 1: *           hr1    day1  mon1 yr1   -- ommitted [min1,2]    #                                                      -- or min: 0-59
+
+
+	$cron_time_lines[0] = &construct_cron_time_line ($min1, $min2, $hr1, $hr1, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+
+} # same_hour_construct_cron_time 
+
+
+sub same_day_construct_cron_time {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+	# Construct cron time line(s) for same day time range.
+    # Set  cron_time_lines
+	# Line 1: min1-59   hr1             day1  mon1 yr1
+    #   or 1:   *       hr1             day1  mon1 yr1 -- ommitted [min1]
+    #    [ 2:   *       (hr1+1)-(h2-1)  day1  mon1 yr1] -- if (hr1+1)!=h2)
+    #      3:   0-min2  hr2             day1  mon1 yr1
+    #   or 3:   *       hr2             day1  mon1 yr1 -- ommitted [min2]
+	# Optimization are used to reduce the number of lines.
+	local($i) = 0;
+
+	if (&all_minutes($min1, 59)) {
+		# line 1
+		if (&all_minutes(0, $min2)) {
+			# from hr1-hr2 for all minutes
+			$tmp_hr1 = $hr1;
+			$tmp_hr2 = $hr2;
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $tmp_hr1, $tmp_hr2, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+
+			return;
+		}
+		else {
+			if ($hr2 > 0) {
+				# from hr1-(hr2-1) for all minutes
+				$tmp_hr1 = $hr1;
+				$tmp_hr2 = $hr2-1;
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $tmp_hr1, $tmp_hr2, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+			}
+
+		}
+
+
+	}
+	else {
+		# line 1
+		$cron_time_lines[$i++] = &construct_cron_time_line ($min1, 59, $hr1, $hr1, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+
+		# line 2
+		if ($hr1+1 != $hr2) {
+			if ($min2 == 59 || $min2 < 0) {
+				# from (hr1+1)-hr2 for all minutes
+				$tmp_hr1 = $hr1+1;
+				$tmp_hr2 = $hr2;
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $tmp_hr1, $tmp_hr2, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+
+				return;
+			}
+
+			# from (hr1+1)-(hr2-1) for all minutes
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $hr1+1, $hr2-1, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+		}
+	}
+
+	# line 3
+	# for hr2 from 0-min2 
+	$cron_time_lines[$i++] = &construct_cron_time_line (0, $min2, $hr2, $hr2, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+
+	
+} # same_day_construct_cron_time 
+
+sub same_month_construct_cron_time {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+	# Construct cron time line(s) for same month time range.
+    # Set  cron_time_lines
+
+	# Line 1: min1-59   hr1        day1            mon1 yr1
+    #   or 1:   *       hr1        day1            mon1 yr1 -- ommitted [min1]
+    #      2:   *   (hr1+1)-23     day1            mon1 yr1
+    #    [ 3:   *        *      (day1+1)-(day2-1)  mon1 yr1 ] if ((day1+1)!=day2)
+    #    [ 4:   *    0-(hr2-1)     day2            mon1 yr1 ] if (hr2 != 0)
+    #      5:  0-min2   hr2        day2            mon1 yr1
+    #   or 5:   *       hr2        day2            mon1 yr1 -- ommitted [min2]
+
+	# Optimization are used to reduce the number of lines.
+
+	local($i) = 0;
+	if ($min1 == 0 || $min1 < 0) {
+		# line 1
+		if (&all_hours($hr1, 23)) {
+			if (&all_hours(0, $hr2)) {
+				# day1-day2, all hours and all minutes
+				$tmp_day1 = $day1;
+				$tmp_day2 = $day2;
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", $tmp_day1, $tmp_day2, $mon1, $mon1, $yr1, $yr1);
+				return;
+			}
+			else {
+                # day1-(day2-1), all hours and all minutes, yr1
+				$tmp_day1 = $day1;
+				$tmp_day2 = $day2-1;
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", $tmp_day1, $tmp_day2, $mon1, $mon1, $yr1, $yr1);
+				do same_month_line4to_all($hr1,$min1, $mon1, $day1, $yr1, $hr2,
+										  $min2,$mon2, $day2, $yr2, *cron_time_lines);
+				return;
+			}
+		}
+		else {
+			# day1, hr1-23 and all minutes, yr1
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $hr1, 23, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+			do same_month_line3to_all($hr1,$min1, $mon1, $day1, $yr1, $hr2,
+									  $min2,$mon2, $day2, $yr2, *cron_time_lines);
+			return;
+
+		}
+	}
+	else {
+		#line 1
+		# min1-59, hr1, day1, yr1
+		$cron_time_lines[$i++] = &construct_cron_time_line ($min1, 59, $hr1, $hr1, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+	}
+
+	
+	# line 2
+	
+	$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $hr1+1, 23, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+
+
+	#line 3-
+	do same_month_line3to_all($hr1,$min1, $mon1, $day1, $yr1, $hr2,
+							  $min2,$mon2, $day2, $yr2, *cron_time_lines);
+
+
+} # same_month_construct_cron_time 
+
+sub same_year_construct_cron_time {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+	# Construct cron time line(s) for same year time range.
+    # Set  cron_time_lines
+
+	# Line 1: min1-59   hr1       day1            mon1   yr1
+    #   or 1:   *       hr1       day1            mon1   yr1 -- ommitted [min1]
+    #      2:   *   (hr1+1)-23    day1            mon1   yr1
+    #      3:   *        *   (day1+1)-last_day    mon1   yr1
+    #    [ 4:   *        *         *   (mon1+1)-(mon2-1) yr1 ] if ((mon1+1)!=mon2)
+    #      5:   *        *     1-(day2-1)         mon2   yr1
+    #    [ 6:   *    0-(hr2-1)    day2            mon2   yr1 ] if (hr2 != 0)
+    #      7:  0-min2   hr2       day2            mon2   yr1
+    #   or 7:   *       hr2       day2            mon2   yr1 -- ommitted [min2]
+	# Optimization are used to reduce the number of lines.
+
+	local($i) = 0;
+
+	$last_day_for_mon1 = &get_ndays_for_month($mon1, $yr1);
+	if (&all_minutes($min1, 59)) {
+		# line 1
+		if (&all_hours($hr1, 23)) {
+			if ($day1 == 1 && $mon1 != $mon2) {
+				# mon1-mon2, all days, hours, and minutes
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", "*", "*", $mon1, $mon2, $yr1, $yr1);
+					
+				return;
+			}
+			else {
+				# mon1, day1- last_day_for_mon1, all hour & minutes
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", $day1, $last_day_for_mon1, $mon1, $mon1, $yr1, $yr1);
+				do same_year_line5to_all($hr1,$min1, $mon1, $day1, $yr1, 
+										 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+				return;
+			}
+		}
+		else {
+			# mon1, day1, hr1-23, all minutes
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $hr1, 23, $day1, $day1, $mon1, $mon1, $yr1, $yr1);	
+			do same_year_line3to_all($hr1,$min1, $mon1, $day1, $yr1, 
+									 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+			return;
+		}
+	}
+	else {
+		$cron_time_lines[$i++] = &construct_cron_time_line ($min1, 59, $hr1, $hr1, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+	}
+
+	# line 2
+	$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $hr1+1, 23, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+
+	# line 3-
+	do same_year_line3to_all($hr1,$min1, $mon1, $day1, $yr1, 
+							 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+
+} # same_year_construct_cron_time 
+
+
+sub different_years_construct_cron_time {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+	# Construct cron time line(s) for different year time range.
+    # Set  cron_time_lines
+	# Line 1: min1-59   hr1       day1            mon1   yr1
+    #   or 1:   *       hr1       day1            mon1   yr1 -- ommitted [min1]
+    #      2:   *   (hr1+1)-23    day1            mon1   yr1
+    #      3:   *        *   (day1+1)-last_day    mon1   yr1
+    #      4:   *        *         *   (mon1+1)-last_mon yr1
+    #   [  5:   *        *         *               *  (yr1+1)-(yr2-1)] if ((yr1+1)!=yr2)
+    #    
+    #      6:   *        *         *          1-(mon2-1) yr2
+    #      7:   *        *     1-(day2-1)         mon2   yr2
+    #    [ 8:   *    0-(hr2-1)    day2            mon2   yr2 ] if (hr2 != 0)
+    #      9:  0-min2   hr2       day2            mon2   yr2
+    #   or 9:   *       hr2       day2            mon2   yr2 -- ommitted [min2]
+	# Optimization are used to reduce the number of lines.
+
+	local($i) = 0;
+	$last_day_for_mon1 = &get_ndays_for_month($mon1, $yr1);
+	$last_day_for_mon2 = &get_ndays_for_month($mon2, $yr2);
+	if (&all_minutes($min1, 59)) {
+		if (&all_hours($hr1, 23)) {
+			if ($day1 == 1 && $mon1 == 1) {
+				if ($day2 == 31 && $mon2 == 12) {
+					# all minutes, hrs, days, months for yr1-yr2
+
+					$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", "*", "*", "*", "*", $yr1, $yr2);
+					return;
+				}
+				# all minuts, hrs, days, mon1-12, yr1-(yr2-1)
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", "*", "*", $mon1, 12, $yr1, $yr2-1);
+				do diff_year_line6to_all($hr1,$min1, $mon1, $day1, $yr1, 
+										 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+				return;
+
+			}
+
+			else {
+				# all minutes, hrs, all 1-last_day_for_mon, mon1, yr1
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", $day1, $last_day_for_mon1, $mon1, $mon1, $yr1, $yr1);
+
+				do diff_year_line4to_all($hr1,$min1, $mon1, $day1, $yr1, 
+										 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+				return;
+			}
+		}
+		else {
+			# all minutes, hr1-23, day1, mon1, yr1
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $hr1, 23, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+
+			do diff_year_line3to_all($hr1,$min1, $mon1, $day1, $yr1, 
+									 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+			return;
+		}
+	}
+	else {
+
+		$cron_time_lines[$i++] = &construct_cron_time_line ($min1, 59, $hr1, $hr1, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+	}
+
+	# line 2
+	$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", $hr1+1, 23, $day1, $day1, $mon1, $mon1, $yr1, $yr1);
+
+	do diff_year_line3to_all($hr1,$min1, $mon1, $day1, $yr1, 
+							 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+
+} # different_years_construct_cron_time 
+
+
+sub construct_cron_time_line  {
+	local($min1, $min2, $hr1, $hr2, 
+		  $day1, $day2, $mon1, $mon2, $yr1, $yr2) = @_;
+	# Construct cron time line and return it.
+	# If min < 0 then use widecard.
+    # min, hr, day, mon, yr may be '*'.
+
+
+	# min_str: min1-min2 
+    #   or   : 0-min2        -- ommitted [min1]
+    #   or   : min1-59       -- ommitted [min2]
+    #   or   : *
+	$min_str = &format_range_str($min1, $min2, 0, 59);
+	$hr_str = &format_range_str($hr1, $hr2, 0, 23);
+	$mon_str = &format_range_str($mon1, $mon2, 1, 12);
+	$day_str = &format_range_str($day1, $day2, 1, 31);
+	$yr_str = &format_range_str($yr1, $yr2, -1, -1);
+
+	local($line) = sprintf("%-7.7s %-7.7s %-7.7s %-7.7s %-11.11s", 
+						   $min_str, $hr_str, $day_str, $mon_str, $yr_str);
+	return $line;
+}
+
+
+sub format_range_str {
+	local($item1, $item2, $min_val, $max_val) = @_;
+	# If item < 0, then use min_val or max_val if defined (>=0).
+	# str    : item1-item2 
+    #   or   : min_val-item2        -- ommitted [min1]
+    #   or   : item1-max_val       -- ommitted [min2]
+    #   or   : *
+	if ($item1 eq "*" || ($item1 < 0 && $item2 < 0) ||
+		($item2 < 0 && $item1 == $min_val)) {
+		$item_str = "*";
+	}
+	elsif ($item2 < 0 && $item1 > $min_val) {
+		$item_str = sprintf("%d-%d", $item1, $max_val);
+	}
+	elsif ($item1 == $item2) {
+		$item_str = "$item1";
+	}
+	elsif ($item1 > $item2) {
+		$item_str = $item2;
+	}
+	else {
+		local($tmp_min) = $min_val;
+		$tmp_min = $item1 if ($item1 >= 0 || $min_val < 0);
+		local($tmp_max) = $max_val;
+		$tmp_max = $item2 if ($item2 >= 0 || $max_val < 0);
+
+		if ($tmp_min == $tmp_max) {
+			$item_str = "$tmp_min";
+		}
+		else {
+			$item_str = sprintf("%d-%d", $tmp_min, $tmp_max);
+		}
+
+		local($all_val) = sprintf("%d-%d", $min_val, $max_val);
+		$item_str = "*" if ($item_str eq $all_val);
+
+	}
+	return $item_str;
+}
+
+sub get_ndays_for_month {
+	local($mon, $yr) = @_;
+	# $mon = 1-12
+    # yr = yyyy
+	return 0 if ($mon < 1 || $mon > 12 || $yr <1000);
+
+	@nonleap_year_ndays_table =  
+		(0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+	@leap_year_ndays_table =  
+		(0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+
+	$leap = ($yr % 4 == 0 && $yr % 100 !=0) || ($yr % 400 == 0);
+	return $leap_year_ndays_table[$mon] if ($leap);
+	return $nonleap_year_ndays_table[$mon];
+}
+
+
+sub all_hours {
+	local($hr1, $hr2) = @_;
+
+	# return 1 if hr range is from 0-23, or -1.
+	return ((($hr1 < 0 && $hr2 < 0) || 
+			 ($hr1 < 0 && $hr2 == 23) || 
+			 ($hr1 == 0 && $hr2 < 0) || 
+			 ($hr1 == 0 && $hr2 == 23)));
+}
+
+
+sub all_minutes {
+	local($min1, $min2) = @_;
+	# return 1 if min range is from 0-59, or -1.
+	return ((($min1 < 0 && $min2 < 0) || 
+			 ($min1 < 0 && $min2 == 59) || 
+			 ($min1 == 0 && $min2 < 0) || 
+			 ($min1 == 0 && $min2 == 59)));
+}
+
+sub same_month_line4to_all {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+
+	if (&all_minutes(0, $min2)) {
+		# all minutes, 0-hr2, day2
+		$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", 0, $hr2, $day2, $day2, $mon1, $mon1, $yr1, $yr1);
+		return;
+	}
+	else {
+		if ($hr2 != 0) {
+			#line 4
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", 0,  $hr2-1, $day2, $day2, $mon1, $mon1, $yr1, $yr1);
+		}
+	}
+	# line 5
+	$cron_time_lines[$i++] = &construct_cron_time_line (0, $min2, $hr2, $hr2, $day2, $day2, $mon1, $mon1, $yr1, $yr1);
+}
+
+sub same_month_line3to_all {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+	
+	if ($day1+1 != $day2) {
+		$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", $day1+1, $day2-1, $mon1, $mon1, $yr1, $yr1);
+	}
+
+
+	do same_month_line4to_all($hr1,$min1, $mon1, $day1, $yr1, $hr2,
+							  $min2,$mon2, $day2, $yr2, *cron_time_lines);
+
+
+}
+
+
+sub same_year_line3to_all {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+
+	#line 3
+	$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", $day1+1, $last_day_for_mon1, $mon1, $mon1, $yr1, $yr1);
+
+
+	# line 4
+	$last_day_for_mon2 = &get_ndays_for_month($mon2, $yr2);
+	if (&all_minutes(0, $min2)) {
+		if (&all_hours(0, $hr2)) {
+			if ($day2 == $last_day_for_mon2) {
+				# all minutes, hours, days, (mon1+1)-mon2
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", "*", "*", $mon1+1, $mon2, $yr1, $yr1);
+				return;
+			}
+			else {
+				# all minutes, all hours, 1-day2, mon2
+				$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", 1, $day2, $mon2, $mon2, $yr1, $yr1);   
+				return;
+			}
+		}
+		else {
+			# all minutes, 0-hr2, day2, mon2
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", 0, $hr2, $day2, $day2, $mon2, $mon2, $yr1, $yr1);
+			return;
+		}
+	}
+	else { 
+		if (($mon1+1) != $mon2) {
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", "*", "*", $mon1+1, $mon2-1, $yr1, $yr1);
+		}
+	}
+	do same_year_line5to_all($hr1,$min1, $mon1, $day1, $yr1, 
+							 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+
+}
+
+
+sub same_year_line5to_all {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+
+	# line 5
+	if (&all_minutes(0, $min2)) {
+		if (&all_hours(0, $hr2)) { 
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", 1, $day2, $mon2, $mon2, $yr1, $yr1);
+			return;
+		}
+	}
+	$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", 1, $day2-1, $mon2, $mon2, $yr1, $yr1);
+
+
+	# line 6
+	if (&all_minutes(0, $min2)) {
+		# all minutes, 0-hr2, day2, mon2
+		$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", 0, $hr2, $day2, $day2, $mon2, $mon2, $yr1, $yr1);
+		return;
+	}
+	else {
+		if ($hr2 != 0) {
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", 0, $hr2-1, $day2, $day2, $mon2, $mon2, $yr1, $yr1);
+		}
+	}
+
+	# line 7
+	$cron_time_lines[$i++] = &construct_cron_time_line (0, $min2, $hr2, $hr2, $day2, $day2, $mon2, $mon2, $yr1, $yr1);
+
+}
+
+
+sub diff_year_line3to_all {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+
+DIFF_YEAR_LINE3:
+	#line 3
+	$last_day_of_mon1 = &get_ndays_for_month($mon1, $yr1);
+	$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", $day1+1, $last_day_of_mon1, $mon1, $mon1, $yr1, $yr1);
+
+
+	do diff_year_line4to_all($hr1,$min1, $mon1, $day1, $yr1, 
+							 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+
+}
+
+sub diff_year_line4to_all {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+
+	# line 4
+	$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", "*", "*", $mon1+1, 12, $yr1, $yr1);
+
+
+	if (($yr1+1) != $yr2) {
+		#line 5
+		$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", "*", "*", "*", "*", $yr1+1, $yr2-1);
+	}
+
+	do diff_year_line6to_all($hr1,$min1, $mon1, $day1, $yr1, 
+							 $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines);
+}
+
+
+sub diff_year_line6to_all {
+	local($hr1,$min1, $mon1, $day1, $yr1, 
+		  $hr2, $min2,$mon2, $day2, $yr2, *cron_time_lines) = @_;
+	# line 6
+	if ($day2 == $last_day_for_mon2) {
+		# all minutes, hrs, days for 1-mon2, yr2
+		$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", "*", "*", 1, $mon2, $yr2, $yr2);
+		return;
+	}
+	else {
+
+		if ($mon2 != 1) {
+			# all minues, hrs, days for 1-mon2-1, yr2
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", "*", "*", 1, $mon2-1, $yr2, $yr2);
+		}
+	}
+	# line 7
+	if (&all_minutes(0, $min2)) {
+		if (&all_hours(0, $hr2)) {
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", 1, $day2, $mon2, $mon2, $yr2, $yr2);
+			return;
+		}
+	}
+	if ($day2 != 1) {
+		$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", "*", "*", 1, $day2-1, $mon2, $mon2, $yr2, $yr2);
+	}
+
+	# line 8
+	if (&all_minutes(0, $min2)) {
+		# all minutes, 0-hr2, day2, mon2
+		$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", 0, $hr2, $day2, $day2, $mon2, $mon2, $yr2, $yr2);
+		return;
+	}
+	else {
+		if ($hr2 != 0) {
+
+			$cron_time_lines[$i++] = &construct_cron_time_line ("*", "*", 0, $hr2-1, $day2, $day2, $mon2, $mon2, $yr2, $yr2);
+		}
+	}
+
+	# line 9
+	$cron_time_lines[$i++] = &construct_cron_time_line (0, $min2, $hr2, $hr2, $day2, $day2, $mon2, $mon2, $yr2, $yr2);
+}
